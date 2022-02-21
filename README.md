@@ -1,4 +1,4 @@
-# Cassie
+# SandDB
 Implementation of Cassandra DB. 
 
 ## Project Structure
