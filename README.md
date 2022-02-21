@@ -3,13 +3,11 @@ Implementation of Cassandra DB.
 
 ## Project Structure
 ```
-cassie/
-├─ db/
-├─ utils/
-├─ p2p/
-├─ test/
-│  ├─ db/
-│  ├─ utils/
-│  ├─ p2p/
+sanddb/
+├─ consistent_hashing/
+├─ leaderless_replication/
+├─ strict_quorum/
+├─ storage_system/
 ├─ main.go
+├─ Dockerfile
 ```
