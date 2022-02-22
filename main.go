@@ -1,23 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"log"
-	"net/http"
 )
 
-func hello(w http.ResponseWriter, _ *http.Request) {
-	_, err := fmt.Fprint(w, "hello world")
+func hello(c *fiber.Ctx) error {
+	err := c.SendString("Henlo world with fiber")
 	if err != nil {
 		log.Fatalf("Error in hello world: %s", err)
-		return
 	}
+	return err
 }
 func main() {
-	http.HandleFunc("/hello", hello)
-	err := http.ListenAndServe(":9090", nil)
+	app := fiber.New()
+	app.Get("/", hello)
+	err := app.Listen(":8000")
 	if err != nil {
-		log.Fatalf("Error in setting up server: %s", err)
-		return
+		log.Fatalf("Error in starting up server: %s", err)
 	}
 }
