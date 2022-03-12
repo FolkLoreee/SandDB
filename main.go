@@ -4,6 +4,7 @@ import (
 	"cassie/strict_quorum"
 	"github.com/gofiber/fiber/v2"
 	"log"
+	"math/rand"
 )
 
 func hello(c *fiber.Ctx) error {
@@ -15,8 +16,15 @@ func hello(c *fiber.Ctx) error {
 }
 func main() {
 	app := fiber.New()
-	requestHandler := &strict_quorum.RequestHandler{
-		App: app,
+	nodeID := rand.Intn(10000)
+	//initialize a Node
+	node := &strict_quorum.Node{
+		Id:    nodeID,
+		Clock: 0,
+	}
+
+	requestHandler := &strict_quorum.Handler{
+		Node: node,
 	}
 	app.Get("/", hello)
 	app.Get("/request", requestHandler.HandleRequest)
