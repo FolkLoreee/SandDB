@@ -1,0 +1,14 @@
+ring:
+  nodes:
+    - id: 0
+      ipaddress: "http://127.0.0.1"
+      port: ":8000"
+    - id: 1
+      ipaddress: "http://127.0.0.1"
+      port: ":8001"
+    - id: 2
+      ipaddress: "http://127.0.0.1"
+      port: ":8002"
+    - id: 3
+      ipaddress: "http://127.0.0.1"
+      port: ":8003"
