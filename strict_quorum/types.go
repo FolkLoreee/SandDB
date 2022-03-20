@@ -1,5 +1,9 @@
 package strict_quorum
 
+import (
+	"time"
+)
+
 type RequestType int
 type MessageType int
 
@@ -20,19 +24,20 @@ type Handler struct {
 	Request     *Request
 	Node        *Node
 	Cluster     *Cluster
+	Timeout     time.Duration
 	VoteChannel chan string
 	Votes       int
 }
 type Node struct {
 	Id        int    `json:"id"`
-	Clock     int    `json:"clock"`
 	IPAddress string `json:"ip_address"`
+	Port      string `json:"port"`
 }
 
 //Cluster consists of multiple Nodes
 type Cluster struct {
-	Votes int     `json:"votes"`
-	Nodes []*Node `json:"node_ids"`
+	Nodes    []*Node `json:"nodes" yaml:"nodes"`
+	MinVotes int     `json:"min_votes" yaml:"min_votes"`
 }
 
 //Request means message from client

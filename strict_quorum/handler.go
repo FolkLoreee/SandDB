@@ -8,13 +8,14 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"time"
 )
 
 func (h *Handler) HandleRequest(c *fiber.Ctx) error {
 	var (
 		request Request
 	)
-	err := c.BodyParser(request)
+	err := c.BodyParser(&request)
 	if err != nil {
 		fmt.Printf("Error in parsing request: %s", err.Error())
 		return err
@@ -30,24 +31,31 @@ func (h *Handler) HandleRequest(c *fiber.Ctx) error {
 	return nil
 }
 func (h *Handler) handleWriteRequest() error {
-	var (
-		quorumVotes int
-		minVotes    int
-	)
-	minVotes = int(math.Ceil(float64(len(h.Cluster.Nodes) / 2)))
+	h.Votes = 0
+	h.Cluster.MinVotes = int(math.Ceil(float64(len(h.Cluster.Nodes) / 2)))
 	voteChannel := make(chan string)
 	h.VoteChannel = voteChannel
 	go h.countVotes()
-	for i := range h.Cluster.Nodes {
-		err := h.sendQuorumRequest(h.Cluster.Nodes[i])
-		if err != nil {
-			fmt.Printf("Error in sending quorum requests: %s", err.Error())
-			return err
+	for id := range h.Cluster.Nodes {
+		if id != h.Node.Id {
+			err := h.sendQuorumRequest(h.Cluster.Nodes[id])
+			if err != nil {
+				fmt.Printf("Error in sending quorum requests: %s", err.Error())
+				//return err
+			}
 		}
 	}
-	if quorumVotes >= minVotes {
+	time.Sleep(h.Timeout)
+	if h.Votes >= h.Cluster.MinVotes {
 		//TODO: Write data to local DB
+		fmt.Println("Quorum passed!")
+		fmt.Printf("Node %d: Number of votes received: %d\tNumber of votes required:%d\n", h.Node.Id, h.Votes, h.Cluster.MinVotes)
+		fmt.Println("Writing to DB...")
+	} else {
+		fmt.Println("Insufficient Quorum")
+		fmt.Printf("Node %d: Number of votes received: %d\tNumber of votes required:%d\n", h.Node.Id, h.Votes, h.Cluster.MinVotes)
 	}
+	defer close(h.VoteChannel)
 	return nil
 }
 func (h *Handler) handleReadRequest() (error, Data) {
@@ -60,7 +68,6 @@ func (h *Handler) sendQuorumRequest(node *Node) error {
 	var (
 		responseMsg PeerMessage
 	)
-	h.Votes = 0
 	quorumRequest := PeerMessage{
 		Type:     QUORUM_REQUEST,
 		Content:  "",
@@ -72,7 +79,7 @@ func (h *Handler) sendQuorumRequest(node *Node) error {
 		return err
 	}
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(node.IPAddress, "application/json", postBody)
+	response, err := http.Post(node.IPAddress+node.Port+"/quorum/start", "application/json", postBody)
 
 	if err != nil {
 		fmt.Printf("Error in posting quorum request: %s", err.Error())
@@ -86,7 +93,6 @@ func (h *Handler) sendQuorumRequest(node *Node) error {
 		return err
 	}
 	h.VoteChannel <- responseMsg.Content
-	defer close(h.VoteChannel)
 	return nil
 }
 func (h *Handler) countVotes() {
@@ -95,7 +101,11 @@ func (h *Handler) countVotes() {
 		case msg := <-h.VoteChannel:
 			if msg == "1" {
 				h.Votes++
+				fmt.Printf("Vote received. Current votes: %d\n", h.Votes)
 			}
+		case <-time.After(h.Timeout):
+			fmt.Printf("Timeout\n")
+			return
 		}
 	}
 }
