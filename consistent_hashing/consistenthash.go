@@ -2,8 +2,13 @@ package consistent_hashing
 
 import (
 	"crypto/md5"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"sort"
 	"unsafe"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func ByteArrayToInt(arr []byte) int64 {
@@ -87,3 +92,27 @@ func (r *Ring) GetNode(partitionKey string) Node {
 // 	r.NodeHashes = nodeHashes
 // 	delete(r.Nodes, nodeHashes[index])
 // }
+
+func (h *Handler) HandleCoordinatorRequest(c *fiber.Ctx) error {
+	var (
+		requestMsg PeerMessage
+	)
+	coordinatorResponse := &PeerMessage{
+		Type:     MessageType(NODE_ACK),
+		Content:  "1",
+		SourceID: h.Node.Id,
+	}
+	err := c.BodyParser(&requestMsg)
+	if err != nil {
+		return err
+	}
+	resp, err := json.Marshal(coordinatorResponse)
+	if err != nil {
+		_ = c.SendStatus(http.StatusInternalServerError)
+		return err
+	}
+	_ = c.Send(resp)
+	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
+	fmt.Printf("Content received: %s.", requestMsg.Content)
+	return nil
+}

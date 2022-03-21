@@ -79,8 +79,8 @@ func main() {
 	app.Get("/", hello)
 	app.Post("/request", requestHandler.HandleRequest)
 
-	// quorumGroup := app.Group("/quorum")
-	// quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
+	chashGroup := app.Group("/chash")
+	chashGroup.Post("/coordinate", requestHandler.HandleCoordinatorRequest)
 
 	err = app.Listen(node.Port)
 	if err != nil {

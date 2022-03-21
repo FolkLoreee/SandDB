@@ -8,6 +8,11 @@ const (
 	REQUEST_READ
 )
 
+const (
+	COORDINATOR_REQUEST RequestType = iota
+	NODE_ACK
+)
+
 func (r RequestType) String() string {
 	return [...]string{"Write", "Read"}[r]
 }
