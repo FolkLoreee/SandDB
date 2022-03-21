@@ -66,7 +66,7 @@ func (c *Cursor) Seek(key []byte) *Node {
 }
 
 // Next get to the next leaf node.
-// return nil if the current node is the last node
+// Return nil if the current node is the last node
 func (c *Cursor) Next() *Node {
 	node := c.pos
 	if node == nil {
