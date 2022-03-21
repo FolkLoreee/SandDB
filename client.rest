@@ -1,0 +1,11 @@
+GET http://127.0.0.1:8000 HTTP/1.1
+
+###
+
+POST http://127.0.0.1:8000/request HTTP/1.1
+content-type: application/json
+
+{
+    "type": 0,
+    "content": "2"
+}

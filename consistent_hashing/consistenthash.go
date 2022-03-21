@@ -48,9 +48,18 @@ func Int64ToInt(int64Values []int64) []int {
 }
 
 func (r *Ring) Search(hash int64) int {
-	index := sort.Search(len(r.NodeHashes), func(idx int) bool {
-		return r.NodeHashes[idx] >= hash
-	})
+	// index := sort.Search(len(r.NodeHashes), func(idx int) bool {
+	// 	fmt.Println(r.NodeHashes[idx] >= hash)
+	// 	fmt.Printf("%d >= %d\n", idx, hash)
+	// 	return r.NodeHashes[idx] >= hash
+	// })
+	index := 0
+	for idx, nodeHash := range r.NodeHashes {
+		if hash <= nodeHash {
+			index = idx
+			break
+		}
+	}
 
 	return index
 }
@@ -60,7 +69,8 @@ func (r *Ring) GetNode(partitionKey string) Node {
 	index := r.Search(hash)
 
 	nodeHash := r.NodeHashes[index]
-	return *r.Nodes[nodeHash]
+	// return *r.Nodes[nodeHash]
+	return *r.NodeMap[nodeHash]
 }
 
 // func (r *Ring) AddNode(node *Node) {

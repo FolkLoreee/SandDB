@@ -25,7 +25,7 @@ func setupRing(config c.Configurations) consistent_hashing.Ring {
 	ring.NodeMap = make(map[int64]*consistent_hashing.Node)
 
 	for _, node := range ring.Nodes {
-		node.Hash = consistent_hashing.GetHash(string(node.Id))
+		node.Hash = consistent_hashing.GetHash(node.Port)
 		ring.NodeMap[node.Hash] = node
 		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
 	}

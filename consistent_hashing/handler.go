@@ -26,10 +26,18 @@ func (h *Handler) HandleRequest(c *fiber.Ctx) error {
 }
 
 func (h *Handler) handleWriteRequest() error {
-	fmt.Println("Write request")
-	fmt.Println(h.Ring.NodeHashes)
 
 	// Hash partition key sent by client
+	partitionKey := h.Request.Content
+	hashedPK := GetHash(partitionKey)
+	fmt.Printf("%s hashed to %d\n", partitionKey, hashedPK)
+
+	fmt.Println(h.Ring.NodeHashes)
+	// index := h.Ring.Search(hashedPK)
+	// fmt.Println(index)
+	node := h.Ring.GetNode(partitionKey)
+	fmt.Printf("%d with hash %d", node.Id, node.Hash)
 
 	return nil
+
 }
