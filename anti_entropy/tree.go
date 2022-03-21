@@ -25,7 +25,7 @@ type MerkleTree struct {
 	// fullRange represents a partition in the hash ring
 	fullRange Range
 
-	// depth of the merkle tree
+	// Depth of the Merkle tree
 	depth uint8
 
 	root *Node

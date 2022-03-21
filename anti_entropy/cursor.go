@@ -40,7 +40,7 @@ func (c *Cursor) Seek(key []byte) *Node {
 	}
 
 	if !node.inRange(key) {
-		panic(fmt.Sprintf("The given key is not in the merkle tree: %v", key))
+		panic(fmt.Sprintf("The given key is not in the Merkle tree: %v", key))
 	}
 
 	// Traverse down the tree to find a leaf node with range that match the key
