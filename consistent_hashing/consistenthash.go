@@ -86,7 +86,7 @@ func (r *Ring) Replicate(partitionKey string) []*Node {
 
 	// replicated nodes
 	fmt.Println("Nodes to replicate to:")
-	for i := 1; i <= r.ReplicationFactor; i++ {
+	for i := 1; i < r.ReplicationFactor; i++ {
 		replIdx := (index + i) % len(r.NodeHashes)
 		fmt.Println(replIdx)
 		nodeHash := r.NodeHashes[replIdx]

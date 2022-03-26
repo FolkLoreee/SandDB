@@ -25,15 +25,11 @@ func setupRing(config c.Configurations) consistent_hashing.Ring {
 	ring.NodeMap = make(map[int64]*consistent_hashing.Node)
 
 	for _, node := range ring.Nodes {
-		node.Hash = consistent_hashing.GetHash(node.Port)
+		node.Hash = consistent_hashing.GetHash(strconv.Itoa(node.Id))
 		ring.NodeMap[node.Hash] = node
 		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
 		ring.ReplicationFactor = 2
 	}
-
-	// sort the hashes
-	ring.NodeHashes = consistent_hashing.Sort(ring.NodeHashes)
-
 	return ring
 }
 
@@ -65,9 +61,10 @@ func main() {
 		Id:        nodeID,
 		IPAddress: config.Ring.Nodes[nodeID].IPAddress,
 		Port:      config.Ring.Nodes[nodeID].Port,
-		Hash:      consistent_hashing.GetHash(args[1]),
+		Hash:      consistent_hashing.GetHash(strconv.Itoa(nodeID)),
 	}
 
+	fmt.Printf("Node #%d: Hash: %d", node.Id, node.Hash)
 	// Initialize the Ring
 	ring = setupRing(config)
 
