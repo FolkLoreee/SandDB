@@ -99,7 +99,7 @@ func (node *Node) sendReadRequest(receivingNode *Node) error {
 	}
 
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(receivingNode.IPAddress+receivingNode.Port+"/readNodeData", "application/json", postBody)
+	response, err := http.Post(receivingNode.IPAddress+receivingNode.Port+"/request/readNodeData", "application/json", postBody)
 	if err != nil {
 		fmt.Printf("Error posting read request: %s", err.Error())
 		return err
@@ -185,7 +185,7 @@ func (node *Node) sendWriteRequest(receivingNode *Node, content int) error {
 	}
 
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(receivingNode.IPAddress+receivingNode.Port+"writeRequest", "application/json", postBody)
+	response, err := http.Post(receivingNode.IPAddress+receivingNode.Port+"/request/writeNodeData", "application/json", postBody)
 	if err != nil {
 		fmt.Printf("Error posting write request: %s", err.Error())
 		return err

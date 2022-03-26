@@ -60,8 +60,10 @@ func main() {
 
 	quorumGroup := app.Group("/quorum")
 	quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
-	app.Post("/readRequest", cluster.HandleRequest)
-	app.Post("/readNodeData", node.HandleNodeRequest)
+
+	nodeGroup := app.Group("/request")
+	nodeGroup.Post("/readNodeData", node.HandleNodeRequest)
+	nodeGroup.Post("/writeNodeData", node.HandleNodeRequest)
 
 	err = app.Listen(node.Port)
 
