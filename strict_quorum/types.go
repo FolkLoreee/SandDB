@@ -15,6 +15,10 @@ const (
 	QUORUM_REQUEST MessageType = iota
 	QUORUM_OK
 )
+const (
+	READ_OK MessageType = iota
+	WRITE_OK
+)
 
 func (r RequestType) String() string {
 	return [...]string{"Write", "Read"}[r]
@@ -29,21 +33,25 @@ type Handler struct {
 	Votes       int
 }
 type Node struct {
-	Id        int    `json:"id"`
-	IPAddress string `json:"ip_address"`
-	Port      string `json:"port"`
+	DataChannel chan Reply
+	DataStore   map[int]Reply
+	Id          int    `json:"id"`
+	IPAddress   string `json:"ip_address"`
+	Port        string `json:"port"`
 }
 
 //Cluster consists of multiple Nodes
 type Cluster struct {
-	Nodes    []*Node `json:"nodes" yaml:"nodes"`
-	MinVotes int     `json:"min_votes" yaml:"min_votes"`
+	Nodes       []*Node `json:"nodes" yaml:"nodes"`
+	MinVotes    int     `json:"min_votes" yaml:"min_votes"`
+	CurrentNode *Node   `json:"current_node"`
 }
 
 //Request means message from client
 type Request struct {
-	Type    RequestType `json:"type"`
-	Content string      `json:"content"`
+	Type     RequestType `json:"type"`
+	Content  int         `json:"content"`
+	SourceID int         `json:"node_id"`
 }
 
 //PeerMessage means message from other SandDB nodes
@@ -55,4 +63,11 @@ type PeerMessage struct {
 
 //Data is the information written in / fetched from DB
 type Data struct {
+}
+
+type Reply struct {
+	Type     MessageType `json:"type"`
+	Version  int         `json:"version"`
+	Content  int         `json:"content"`
+	SourceID int         `json:"node_id"`
 }

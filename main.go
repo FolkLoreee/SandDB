@@ -19,6 +19,7 @@ func hello(c *fiber.Ctx) error {
 	}
 	return err
 }
+
 func main() {
 	var (
 		config  c.Configurations
@@ -53,13 +54,17 @@ func main() {
 		Cluster: &cluster,
 		Timeout: time.Duration(config.Timeout) * time.Second,
 	}
+	cluster.CurrentNode = node
 	app.Get("/", hello)
 	app.Post("/request", requestHandler.HandleRequest)
 
 	quorumGroup := app.Group("/quorum")
 	quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
+	app.Post("/readRequest", cluster.HandleRequest)
+	app.Post("/readNodeData", node.HandleNodeRequest)
 
 	err = app.Listen(node.Port)
+
 	if err != nil {
 		log.Fatalf("Error in starting up server: %s", err)
 	}
