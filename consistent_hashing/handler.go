@@ -43,6 +43,16 @@ func (h *Handler) handleWriteRequest() error {
 	fmt.Printf("Routing request to node %d at position %d...\n", node.Id, node.Hash)
 	h.sendCoordinatorRequest(&node)
 
+	if h.Ring.ReplicationFactor > 0 {
+		fmt.Printf("Ring replication factor is %d.\n", h.Ring.ReplicationFactor)
+
+		nodesToReplicateTo := h.Ring.Replicate(partitionKey)
+		for _, replNode := range nodesToReplicateTo {
+			fmt.Printf("Replicating to node with hash %d\n", replNode.Hash)
+			h.sendCoordinatorRequest(replNode)
+		}
+	}
+
 	return nil
 
 }
@@ -56,7 +66,7 @@ func (h *Handler) sendCoordinatorRequest(node *Node) error {
 		Content:  h.Request.Content,
 		SourceID: h.Node.Id,
 	}
-	fmt.Println("Sending coordinator request...")
+	fmt.Printf("Sending coordinator request to node with hash %d.\n", node.Hash)
 	body, err := json.Marshal(coordinatorRequest)
 	if err != nil {
 		fmt.Printf("Error in marshalling coordinator request: %s", err.Error())
@@ -76,6 +86,7 @@ func (h *Handler) sendCoordinatorRequest(node *Node) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully routed request: %s\n\n###\n\n", string(jsonResponse))
+	fmt.Printf("Successfully routed request: %s\n\n", string(jsonResponse))
+
 	return nil
 }

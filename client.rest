@@ -2,10 +2,12 @@ GET http://127.0.0.1:8000 HTTP/1.1
 
 ###
 
-POST http://127.0.0.1:8000/request HTTP/1.1
+# To test out replication factor = 2
+# Send req to node 3, expected req to be routed to node 2 and replicated to node 3 and node 0
+POST http://127.0.0.1:8003/request HTTP/1.1
 content-type: application/json
 
 {
     "type": 0,
-    "content": "5"
+    "content": "500"
 }

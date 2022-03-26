@@ -28,6 +28,7 @@ func setupRing(config c.Configurations) consistent_hashing.Ring {
 		node.Hash = consistent_hashing.GetHash(node.Port)
 		ring.NodeMap[node.Hash] = node
 		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
+		ring.ReplicationFactor = 2
 	}
 
 	// sort the hashes

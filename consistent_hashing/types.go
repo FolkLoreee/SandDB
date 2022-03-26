@@ -33,10 +33,11 @@ type Node struct {
 
 // Ring consists of multiple Nodes
 type Ring struct {
-	Nodes      []*Node         `json:"nodes" yaml:"nodes"`
-	MinVotes   int             `json:"min_votes" yaml:"min_votes"`
-	NodeMap    map[int64]*Node `json:"nodeMap"`
-	NodeHashes []int64         `json:"nodeHashes"`
+	Nodes             []*Node         `json:"nodes" yaml:"nodes"`
+	MinVotes          int             `json:"min_votes" yaml:"min_votes"`
+	NodeMap           map[int64]*Node `json:"nodeMap"`
+	NodeHashes        []int64         `json:"nodeHashes"`
+	ReplicationFactor int             `json:"replication_factor"` // replicates at N-1 nodes
 }
 
 // Request means message from client

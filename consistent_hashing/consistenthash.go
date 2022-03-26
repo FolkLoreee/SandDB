@@ -78,6 +78,26 @@ func (r *Ring) GetNode(partitionKey string) Node {
 	return *r.NodeMap[nodeHash]
 }
 
+func (r *Ring) Replicate(partitionKey string) []*Node {
+	nodesToReplicateTo := []*Node{}
+	hash := GetHash(partitionKey)
+	index := r.Search(hash)
+	fmt.Printf("Replicating from node with hash %d\n", hash)
+
+	// replicated nodes
+	fmt.Println("Nodes to replicate to:")
+	for i := 1; i <= r.ReplicationFactor; i++ {
+		replIdx := (index + i) % len(r.NodeHashes)
+		fmt.Println(replIdx)
+		nodeHash := r.NodeHashes[replIdx]
+		node := r.NodeMap[nodeHash]
+		nodesToReplicateTo = append(nodesToReplicateTo, node)
+		fmt.Println(node.Hash)
+	}
+
+	return nodesToReplicateTo
+}
+
 // func (r *Ring) AddNode(node *Node) {
 // 	r.Nodes[node.Hash] = node
 // 	nodeHashes := append(r.NodeHashes, node.Hash)
@@ -113,6 +133,6 @@ func (h *Handler) HandleCoordinatorRequest(c *fiber.Ctx) error {
 	}
 	_ = c.Send(resp)
 	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
-	fmt.Printf("Content received: %s.", requestMsg.Content)
+	fmt.Printf("Content received: %s.\n", requestMsg.Content)
 	return nil
 }
