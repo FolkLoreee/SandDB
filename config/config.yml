@@ -1,0 +1,15 @@
+cluster:
+  nodes:
+    - nodeid: 0
+      ipaddress: "http://127.0.0.1"
+      port: ":8000"
+    - nodeid: 1
+      ipaddress: "http://127.0.0.1"
+      port: ":8001"
+    - nodeid: 2
+      ipaddress: "http://127.0.0.1"
+      port: ":8002"
+    - nodeid: 3
+      ipaddress: "http://127.0.0.1"
+      port: ":8003"
+timeout: 3

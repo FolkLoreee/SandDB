@@ -1,4 +1,4 @@
-package leaderless_replication
+package main
 
 import (
 	"fmt"
@@ -34,11 +34,9 @@ type Data struct {
 Client functions:
 - send requests
 - receive most updated write/read from coordinator
-
 Coordinator functions:
 - send client request to nodes in network and most updated write if any nodes are out of sync
 - receive node replies and sends back the most updated reply back to the client
-
 Node functions:
 - depending on whether it receives a get or update request, either:
 	- send its own data to the coordinator
@@ -172,7 +170,7 @@ func (coordinator *Coordinator) handleNodeReply() {
 }
 
 func main() {
-	fmt.Println("hello world")
+	// fmt.Println("hello world")
 	nodesList := []*Node{}
 
 	// instantiate coordinator
