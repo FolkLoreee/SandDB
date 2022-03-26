@@ -48,7 +48,6 @@ func main() {
 	}
 	//initialize a Cluster
 	cluster = config.Cluster
-	fmt.Printf("Printing cluster: %v\n", cluster.Nodes[1])
 	requestHandler := &strict_quorum.Handler{
 		Node:    node,
 		Cluster: &cluster,
