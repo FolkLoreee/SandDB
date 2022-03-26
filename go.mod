@@ -1,4 +1,4 @@
-module cassie
+module sanddb
 
 go 1.16
 

@@ -1,11 +1,11 @@
 package main
 
 import (
-	c "cassie/config"
-	"cassie/leaderless_replication_v3"
 	"fmt"
 	"log"
 	"os"
+	c "sanddb/config"
+	"sanddb/leaderless_replication_v3"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
