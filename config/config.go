@@ -1,8 +1,8 @@
 package config
 
-import "sanddb/strict_quorum"
+import "sanddb/read_write"
 
 type Configurations struct {
-	Ring    strict_quorum.Ring
+	Ring    read_write.Ring
 	Timeout int
 }

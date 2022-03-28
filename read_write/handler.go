@@ -1,4 +1,4 @@
-package strict_quorum
+package read_write
 
 import (
 	"encoding/json"

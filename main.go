@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	c "sanddb/config"
-	"sanddb/strict_quorum"
+	"sanddb/read_write"
 	"strconv"
 	"time"
 )
@@ -20,12 +20,12 @@ func hello(c *fiber.Ctx) error {
 	return err
 }
 
-func setupRing(config c.Configurations) *strict_quorum.Ring {
+func setupRing(config c.Configurations) *read_write.Ring {
 	ring := &config.Ring
-	ring.NodeMap = make(map[int64]*strict_quorum.Node)
+	ring.NodeMap = make(map[int64]*read_write.Node)
 
 	for _, node := range ring.Nodes {
-		node.Hash = strict_quorum.GetHash(strconv.Itoa(node.Id))
+		node.Hash = read_write.GetHash(strconv.Itoa(node.Id))
 		ring.NodeMap[node.Hash] = node
 		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
 		ring.ReplicationFactor = 2
@@ -54,17 +54,17 @@ func main() {
 	}
 	nodeID, err := strconv.Atoi(args[1])
 	//initialize a Node
-	node := &strict_quorum.Node{
+	node := &read_write.Node{
 		Id:        nodeID,
 		IPAddress: config.Ring.Nodes[nodeID].IPAddress,
 		Port:      config.Ring.Nodes[nodeID].Port,
-		Hash:      strict_quorum.GetHash(strconv.Itoa(nodeID)),
+		Hash:      read_write.GetHash(strconv.Itoa(nodeID)),
 	}
 	fmt.Printf("Node #%d: Hash: %d", node.Id, node.Hash)
 	// Initialize the Ring
 	ring := setupRing(config)
 
-	requestHandler := &strict_quorum.Handler{
+	requestHandler := &read_write.Handler{
 		Node:    node,
 		Ring:    ring,
 		Timeout: time.Duration(config.Timeout) * time.Second,
