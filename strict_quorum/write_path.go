@@ -69,7 +69,7 @@ func (h *Handler) sendWriteRequest(node *Node, data PeerMessage) error {
 		return err
 	}
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(node.IPAddress+node.Port+"/request/writeNodeData", "application/json", postBody)
+	response, err := http.Post(node.IPAddress+node.Port+"/internal/write", "application/json", postBody)
 
 	if err != nil {
 		fmt.Printf("Error in posting coordinator request: %s", err.Error())

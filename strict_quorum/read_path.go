@@ -76,6 +76,7 @@ func (h *Handler) handleClientReadRequest() (PeerMessage, error) {
 		latestVersion.SourceID = node.Id
 		for _, data := range node.DataStore {
 			if data.Version < latestVersion.Version {
+				fmt.Printf("Sending read repair to node %d\n", data.SourceID)
 				err := h.sendWriteRequest(ring.Nodes[data.SourceID], latestVersion)
 				if err != nil {
 					return PeerMessage{}, err
@@ -111,7 +112,7 @@ func (h *Handler) sendReadRequest(receivingNode *Node) error {
 	}
 
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(receivingNode.IPAddress+receivingNode.Port+"/request/readNodeData", "application/json", postBody)
+	response, err := http.Post(receivingNode.IPAddress+receivingNode.Port+"/internal/read", "application/json", postBody)
 	if err != nil {
 		fmt.Printf("Error posting read request: %s", err.Error())
 		return err

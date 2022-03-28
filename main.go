@@ -71,14 +71,14 @@ func main() {
 	}
 	ring.CurrentNode = node
 	app.Get("/", hello)
-	app.Post("/main", requestHandler.HandleRequest)
+	app.Post("/request", requestHandler.HandleRequest)
 
 	//quorumGroup := app.Group("/quorum")
 	//quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
 
-	internalGroup := app.Group("/request")
-	internalGroup.Post("/readNodeData", requestHandler.HandleCoordinatorRead)
-	internalGroup.Post("/writeNodeData", requestHandler.HandleCoordinatorWrite)
+	internalGroup := app.Group("/internal")
+	internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
+	internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
 
 	//chashGroup := app.Group("/chash")
 	//chashGroup.Post("/coordinate", requestHandler.HandleCoordinatorWrite)
