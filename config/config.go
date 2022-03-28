@@ -3,6 +3,6 @@ package config
 import "sanddb/strict_quorum"
 
 type Configurations struct {
-	Cluster strict_quorum.Cluster
+	Ring    strict_quorum.Ring
 	Timeout int
 }

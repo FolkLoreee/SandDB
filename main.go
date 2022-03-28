@@ -20,10 +20,22 @@ func hello(c *fiber.Ctx) error {
 	return err
 }
 
+func setupRing(config c.Configurations) *strict_quorum.Ring {
+	ring := &config.Ring
+	ring.NodeMap = make(map[int64]*strict_quorum.Node)
+
+	for _, node := range ring.Nodes {
+		node.Hash = strict_quorum.GetHash(strconv.Itoa(node.Id))
+		ring.NodeMap[node.Hash] = node
+		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
+		ring.ReplicationFactor = 2
+	}
+	return ring
+}
+
 func main() {
 	var (
-		config  c.Configurations
-		cluster strict_quorum.Cluster
+		config c.Configurations
 	)
 	app := fiber.New()
 	//Reading configuration files
@@ -44,29 +56,34 @@ func main() {
 	//initialize a Node
 	node := &strict_quorum.Node{
 		Id:        nodeID,
-		IPAddress: config.Cluster.Nodes[nodeID].IPAddress,
-		Port:      config.Cluster.Nodes[nodeID].Port,
+		IPAddress: config.Ring.Nodes[nodeID].IPAddress,
+		Port:      config.Ring.Nodes[nodeID].Port,
+		Hash:      strict_quorum.GetHash(strconv.Itoa(nodeID)),
 	}
-	//initialize a Cluster
-	cluster = config.Cluster
+	fmt.Printf("Node #%d: Hash: %d", node.Id, node.Hash)
+	// Initialize the Ring
+	ring := setupRing(config)
+
 	requestHandler := &strict_quorum.Handler{
 		Node:    node,
-		Cluster: &cluster,
+		Ring:    ring,
 		Timeout: time.Duration(config.Timeout) * time.Second,
 	}
-	cluster.CurrentNode = node
+	ring.CurrentNode = node
 	app.Get("/", hello)
-	app.Post("/request", requestHandler.HandleRequest)
+	app.Post("/main", requestHandler.HandleRequest)
 
-	quorumGroup := app.Group("/quorum")
-	quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
+	//quorumGroup := app.Group("/quorum")
+	//quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
 
-	nodeGroup := app.Group("/request")
-	nodeGroup.Post("/readNodeData", node.HandleNodeRequest)
-	nodeGroup.Post("/writeNodeData", node.HandleNodeRequest)
+	internalGroup := app.Group("/request")
+	internalGroup.Post("/readNodeData", requestHandler.HandleCoordinatorRead)
+	internalGroup.Post("/writeNodeData", requestHandler.HandleCoordinatorWrite)
+
+	//chashGroup := app.Group("/chash")
+	//chashGroup.Post("/coordinate", requestHandler.HandleCoordinatorWrite)
 
 	err = app.Listen(node.Port)
-
 	if err != nil {
 		log.Fatalf("Error in starting up server: %s", err)
 	}
