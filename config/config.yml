@@ -14,3 +14,4 @@ ring:
       port: ":8003"
 # timeout in seconds
 timeout: 3
+replication_factor: 3

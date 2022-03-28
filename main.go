@@ -23,12 +23,12 @@ func hello(c *fiber.Ctx) error {
 func setupRing(config c.Configurations) *read_write.Ring {
 	ring := &config.Ring
 	ring.NodeMap = make(map[int64]*read_write.Node)
+	ring.ReplicationFactor = config.ReplicationFactor
 
 	for _, node := range ring.Nodes {
 		node.Hash = read_write.GetHash(strconv.Itoa(node.Id))
 		ring.NodeMap[node.Hash] = node
 		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
-		ring.ReplicationFactor = 2
 	}
 	return ring
 }
@@ -73,15 +73,9 @@ func main() {
 	app.Get("/", hello)
 	app.Post("/request", requestHandler.HandleRequest)
 
-	//quorumGroup := app.Group("/quorum")
-	//quorumGroup.Post("/start", requestHandler.HandleQuorumRequest)
-
 	internalGroup := app.Group("/internal")
 	internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
 	internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
-
-	//chashGroup := app.Group("/chash")
-	//chashGroup.Post("/coordinate", requestHandler.HandleCoordinatorWrite)
 
 	err = app.Listen(node.Port)
 	if err != nil {
