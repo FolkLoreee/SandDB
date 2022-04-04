@@ -16,3 +16,6 @@ content-type: application/json
     "type": 0,
     "content": "500"
 }
+###
+
+GET http://127.0.0.1:8888/hospital HTTP/1.1
