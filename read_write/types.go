@@ -6,6 +6,7 @@ import (
 
 type RequestType int
 type MessageType int
+type NodeStatus int
 
 const (
 	REQUEST_WRITE RequestType = iota
@@ -18,10 +19,21 @@ const (
 	WRITE_ACK
 	READ_OK
 	WRITE_OK
+	KILL
+	KILL_ACK
+)
+
+const (
+	ALIVE NodeStatus = iota
+	DEAD
 )
 
 func (r RequestType) String() string {
 	return [...]string{"Write", "Read"}[r]
+}
+
+func (s NodeStatus) String() string {
+	return [...]string{"Alive", "Dead"}[s]
 }
 
 type Handler struct {
@@ -35,10 +47,11 @@ type Handler struct {
 type Node struct {
 	//DataStore is for coordinator to store responses from other nodes before being sent back to the client
 	DataStore map[int]PeerMessage
-	Id        int    `json:"id"`
-	IPAddress string `json:"ip_address"`
-	Port      string `json:"port"`
-	Hash      int64  `json:"hash"`
+	Id        int        `json:"id"`
+	IPAddress string     `json:"ip_address"`
+	Port      string     `json:"port"`
+	Hash      int64      `json:"hash"`
+	Status    NodeStatus `json:"status"`
 }
 
 //Ring consists of multiple Nodes
