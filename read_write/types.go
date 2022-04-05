@@ -65,5 +65,3 @@ type PeerMessage struct {
 	Content  string      `json:"content"`
 	SourceID int         `json:"node_id"`
 }
-
-//Data is the information written in / fetched from DB
