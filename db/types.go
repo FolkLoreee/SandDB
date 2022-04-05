@@ -38,7 +38,7 @@ type Cell struct {
 
 // MarshalJSON is used to convert the timestamp to JSON
 func (t EpochTime) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(time.Time(t).Unix(), 10)), nil
+	return []byte(strconv.FormatInt(time.Time(t).UnixNano(), 10)), nil
 }
 
 // UnmarshalJSON is used to convert the timestamp from JSON
@@ -48,7 +48,7 @@ func (t *EpochTime) UnmarshalJSON(s []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	*(*time.Time)(t) = time.Unix(q/1000000000, 0)
+	*(*time.Time)(t) = time.Unix(0, q)
 	return nil
 }
 
