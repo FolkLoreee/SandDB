@@ -7,7 +7,7 @@ import (
 
 // MarshalJSON is used to convert the timestamp to JSON
 func (t EpochTime) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(time.Time(t).Unix(), 10)), nil
+	return []byte(strconv.FormatInt(time.Time(t).UnixNano(), 10)), nil
 }
 
 // UnmarshalJSON is used to convert the timestamp from JSON
@@ -17,7 +17,7 @@ func (t *EpochTime) UnmarshalJSON(s []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	*(*time.Time)(t) = time.Unix(q, 0)
+	*(*time.Time)(t) = time.Unix(0, q)
 	return nil
 }
 
@@ -28,7 +28,9 @@ func (t EpochTime) Unix() int64 {
 	return time.Time(t).Unix()
 }
 
-// This returns the Unix time in nanoseconds.
+// UnixNano returns t as a Unix time, the number of nanoseconds elapsed
+// since January 1, 1970 UTC. The result does not depend on the
+// location associated with t.
 func (t EpochTime) UnixNano() int64 {
 	return time.Time(t).UnixNano()
 }
