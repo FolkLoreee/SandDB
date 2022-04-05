@@ -1,4 +1,4 @@
-package read_write
+package db
 
 import (
 	"encoding/json"
@@ -7,20 +7,19 @@ import (
 	"os"
 )
 
-func ReadJSON(filename string) (Entries, error) {
-	var entries Entries
+func ReadJSON(filename string) (Table, error) {
+	var table Table
 
 	jsonFile, err := os.Open(filename)
 	// if we os.Open returns an error then handle it
 	if err != nil {
 		fmt.Printf("Error reading JSON file: %s", err.Error())
-		return Entries{}, err
+		return Table{}, err
 	}
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
+	json.Unmarshal(byteValue, &table)
 
-	json.Unmarshal([]byte(byteValue), &entries)
-
-	return entries, nil
+	return table, nil
 }

@@ -67,32 +67,3 @@ type PeerMessage struct {
 }
 
 //Data is the information written in / fetched from DB
-type Entries struct {
-	Departments []Department `json:"departments"`
-}
-
-type Department struct {
-	Partition Partition `json:"partition"`
-	Rows      []Row     `json:"rows"`
-}
-
-type Partition struct {
-	Key      []string `json:"key"`
-	Position int      `json:"position"`
-}
-
-type Row struct {
-	Type          string              `json:"type"`
-	Position      int                 `json:"position"`
-	Clustering    []string            `json:"clustering"`
-	LivelinesInfo Liveliness          `json:"liveliness_info"`
-	DeletionInfo  map[string]int      `json:"deletion_info"`
-	Cells         []map[string]string `json:"cells"`
-}
-
-type Liveliness struct {
-	Tstamp  int  `json:"tstamp"`
-	TTL     int  `json:"ttl"`
-	Expires int  `json:"expires_at"`
-	Expired bool `json:"expired"`
-}
