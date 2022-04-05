@@ -1,70 +1,80 @@
-{ "departments": [
+[
     {
-        "partition": {
-                "key": ["1", "General"],
-                "position": 0
+        "partition_metadata": {
+                "table_name": "Hospital Information",
+                "partition_key": 0,
+                "partition_key_names": [ "Hospital ID", "Hospital Department" ],
+                "partition_key_values": [ "1", "General" ],
+                "clustering_key_names": [ "Room ID" ]
         },
         "rows": [
             {
-                "type": "row",
-                "position": 10,
-                "clustering": [ "AA-1" ],
-                "liveness_info": { "tstamp": 1464175401324444, "ttl": 604800, "expires_at": 1458089025, "expired": false },
-                "deletion_info": { "deletion_time": 1457484273784615, "tstamp": 1457484273 },
+                "created_at": 1464175401324444,
+                "updated_at": 1464175401324444,
+                "deleted_at": 100,
+                "clustering_key_hash": 0,
+                "clustering_key_values": [ "AA-1" ],
                 "cells": [
-                    {"name": "beds", "value": "10"},
-                    {"name": "oxygen_tanks", "value": "20"}
+                    {"name": "Bed", "value": "10"},
+                    {"name": "Oxygen Tank", "value": "20"}
                 ]
             }
         ]
     },
     {
-        "partition": {
-                "key": ["1", "Specialized"],
-                "position": 110
+        "partition_metadata": {
+                "table_name": "Hospital Information",
+                "partition_key": 0,
+                "partition_key_names": [ "Hospital ID", "Hospital Department" ],
+                "partition_key_values": [ "1", "Specialized" ],
+                "clustering_key_names": [ "Room ID" ]
         },
         "rows": [
             {
-                "type": "row",
-                "position": 120,
-                "clustering": [ "BC-1" ],
-                "liveness_info": { "tstamp": 1464175411324447, "ttl": 604800, "expires_at": 1458089029, "expired": false },
-                "deletion_info": { "deletion_time": 1457484275784615, "tstamp": 1457484275 },
+                "created_at": 1464175411324447,
+                "updated_at": 1464175411324447,
+                "deleted_at": -1,
+                "clustering_key_hash": 0,
+                "clustering_key_values": [ "BC-1" ],
                 "cells": [
-                    {"name": "beds", "value": "15"},
-                    {"name": "oxygen_tanks", "value": "17"}
+                    {"name": "Bed", "value": "15"},
+                    {"name": "Oxygen Tank", "value": "17"}
                 ]
             },
             {
-                "type": "row",
-                "position": 220,
-                "clustering": [ "BC-2" ],
-                "liveness_info": { "tstamp": 1464175501324447, "ttl": 604800, "expires_at": 1458089029, "expired": false },
-                "deletion_info": { "deletion_time": 1457484295784615, "tstamp": 1457484295 },
+                "created_at": 1464175501324447,
+                "updated_at": 1464175501324447,
+                "deleted_at": -1,
+                "clustering_key_hash": 0,
+                "clustering_key_values": [ "BC-2" ],
                 "cells": [
-                    {"name": "beds", "value": "16"},
-                    {"name": "oxygen_tanks", "value": "18"}
+                    {"name": "Bed", "value": "5"},
+                    {"name": "Surgical Table", "value": "2"},
+                    {"name": "X-Ray Machine", "value": "1"}
                 ]
             }
         ]
     },
     {
-        "partition": {
-                "key": ["2", "General"],
-                "position": 320
+        "partition_metadata": {
+                "table_name": "Hospital Information",
+                "partition_key": 0,
+                "partition_key_names": [ "Hospital ID", "Hospital Department" ],
+                "partition_key_values": [ "2", "General" ],
+                "clustering_key_names": [ "Room ID" ]
         },
         "rows": [
             {
-                "type": "row",
-                "position": 330,
-                "clustering": [ "DD-1" ],
-                "liveness_info": { "tstamp": 1504175401324447, "ttl": 604800, "expires_at": 1458089029, "expired": false },
-                "deletion_info": { "deletion_time": 1497484275784615, "tstamp": 1497484275 },
+                "created_at": 1474175501324447,
+                "updated_at": 1474175501324447,
+                "deleted_at": -1,
+                "clustering_key_hash": 0,
+                "clustering_key_values": [ "DD-1" ],
                 "cells": [
-                    {"name": "beds", "value": "100"},
-                    {"name": "oxygen_tanks", "value": "11"}
+                    {"name": "Bed", "value": "100"},
+                    {"name": "Defibrillator", "value": "11"}
                 ]
             }
         ]
     }
-]}
+]
