@@ -24,7 +24,7 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 	}
 
 	//TODO: persist this table metadata on json
-	filename := strconv.Itoa(h.Node.Id)
+	filename := strconv.Itoa(h.Node.Id) + ".json"
 	err = PersistTable(filename, table)
 	if err != nil {
 		return err

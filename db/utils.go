@@ -28,7 +28,7 @@ func PersistTable(filename string, table Table) error {
 	data, err := ReadJSON(filename)
 	data = append(data, table)
 	if err != nil {
-		fmt.Println("File already exists. Appending...")
+		fmt.Println("File does not exist. Creating...")
 	}
 	//MarshalIndent instead of Marshal for legibility during debug
 	jsonFile, err := json.MarshalIndent(data, "", "")
@@ -37,7 +37,7 @@ func PersistTable(filename string, table Table) error {
 		return err
 	}
 	//set permission to readable by all, writeable by user
-	err = ioutil.WriteFile(filename+".json", jsonFile, 0644)
+	err = ioutil.WriteFile(filename, jsonFile, 0644)
 	if err != nil {
 		fmt.Printf("Error in writing file: %s", err.Error())
 		return err
