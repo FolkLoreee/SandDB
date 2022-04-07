@@ -7,9 +7,13 @@ import (
 	"time"
 )
 
-func (h *Handler) createQuorum() error {
+func (h *Handler) createQuorum(requestType RequestType) error {
 	h.Responses = 0
-	h.Ring.MinVotes = int(math.Ceil(float64(h.Ring.ReplicationFactor / 2)))
+	if requestType == REQUEST_CREATE {
+		h.Ring.MinVotes = int(math.Ceil(float64(len(h.Ring.Nodes) / 2)))
+	} else {
+		h.Ring.MinVotes = int(math.Ceil(float64(h.Ring.ReplicationFactor / 2)))
+	}
 	quorumChannel := make(chan PeerMessage)
 	h.QuorumChannel = quorumChannel
 	go h.collectReplies()

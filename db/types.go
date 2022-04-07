@@ -10,11 +10,6 @@ import (
 type Handler struct {
 	Node *read_write.Node
 }
-type CreateRequest struct {
-	TableName          string   `json:"table_name"`
-	PartitionKeyNames  []string `json:"partition_key_names"`
-	ClusteringKeyNames []string `json:"clustering_key_names"`
-}
 type EpochTime time.Time
 
 type LocalData []Table

@@ -73,6 +73,7 @@ func main() {
 	ring.CurrentNode = node
 	app.Get("/", hello)
 	app.Post("/request", requestHandler.HandleRequest)
+	app.Post("/create", requestHandler.HandleClientCreateRequest)
 
 	internalGroup := app.Group("/internal")
 	internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)

@@ -33,7 +33,7 @@ func (h *Handler) handleClientReadRequest() (PeerMessage, error) {
 	receiverNode := h.Ring.GetNode(partitionKey)
 	fmt.Printf("Routing request to receiverNode %d at position %d...\n", receiverNode.Id, receiverNode.Hash)
 	//TODO: integrate with quorum to check if the number of responses received satisfies quorum
-	err := h.createQuorum()
+	err := h.createQuorum(REQUEST_READ)
 	if err != nil {
 		fmt.Printf("Error in creating quorum: %s", err.Error())
 		return PeerMessage{}, err

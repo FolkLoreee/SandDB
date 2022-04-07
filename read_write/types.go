@@ -10,12 +10,15 @@ type MessageType int
 const (
 	REQUEST_WRITE RequestType = iota
 	REQUEST_READ
+	REQUEST_CREATE
 )
 const (
 	COORDINATOR_WRITE MessageType = iota
 	COORDINATOR_READ
+	COORDINATOR_CREATE
 	READ_REPAIR
 	WRITE_ACK
+	CREATE_ACK
 	READ_OK
 	WRITE_OK
 )
@@ -64,4 +67,10 @@ type PeerMessage struct {
 	Version  int         `json:"version"`
 	Content  string      `json:"content"`
 	SourceID int         `json:"node_id"`
+}
+
+type CreateRequest struct {
+	TableName          string   `json:"table_name"`
+	PartitionKeyNames  []string `json:"partition_key_names"`
+	ClusteringKeyNames []string `json:"clustering_key_names"`
 }

@@ -11,14 +11,17 @@ func (h *Handler) HandleRequest(c *fiber.Ctx) error {
 	var (
 		clientRequest Request
 	)
-	err := c.BodyParser(&clientRequest)
-	if err != nil {
-		fmt.Printf("Error in parsing request: %s", err.Error())
-		return err
+	//TODO: Refactor Request out to handle different types of request separately
+	if clientRequest.Type == REQUEST_READ || clientRequest.Type == REQUEST_WRITE {
+		err := c.BodyParser(&clientRequest)
+		if err != nil {
+			fmt.Printf("Error in parsing request: %s", err.Error())
+			return err
+		}
+		h.Request = &clientRequest
 	}
-	h.Request = &clientRequest
 	if clientRequest.Type == REQUEST_WRITE {
-		if err = h.handleClientWriteRequest(); err != nil {
+		if err := h.handleClientWriteRequest(); err != nil {
 			_ = c.SendString(err.Error())
 			return err
 		} else {
@@ -39,7 +42,6 @@ func (h *Handler) HandleRequest(c *fiber.Ctx) error {
 			_ = c.Send(body)
 		}
 	}
-	//TODO: Handle REQUEST_CREATE, broadcast to the other nodes to create the same table
 
 	return nil
 }

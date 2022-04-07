@@ -25,11 +25,8 @@ func ReadJSON(filename string) (LocalData, error) {
 }
 
 func PersistTable(filename string, table Table) error {
-	data, err := ReadJSON(filename)
+	data, _ := ReadJSON(filename)
 	data = append(data, table)
-	if err != nil {
-		fmt.Println("File does not exist. Creating...")
-	}
 	//MarshalIndent instead of Marshal for legibility during debug
 	jsonFile, err := json.MarshalIndent(data, "", "")
 	if err != nil {

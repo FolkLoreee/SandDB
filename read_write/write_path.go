@@ -30,7 +30,7 @@ func (h *Handler) handleClientWriteRequest() error {
 	}
 	go h.collectReplies()
 
-	err := h.createQuorum()
+	err := h.createQuorum(REQUEST_WRITE)
 	if err != nil {
 		return err
 	}
