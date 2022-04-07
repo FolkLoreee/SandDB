@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	c "sanddb/config"
+	"sanddb/db"
 	"sanddb/read_write"
 	"strconv"
 	"time"
@@ -77,6 +78,12 @@ func main() {
 	internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
 	internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
 
+	dbHandler := &db.Handler{
+		Node: node,
+	}
+	dbGroup := app.Group("/db")
+	dbGroup.Post("/", dbHandler.HandleDBInsert)
+	dbGroup.Post("/new", dbHandler.HandleCreateTable)
 	err = app.Listen(node.Port)
 	if err != nil {
 		log.Fatalf("Error in starting up server: %s", err)

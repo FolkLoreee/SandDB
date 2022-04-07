@@ -1,13 +1,29 @@
 package db
 
 import (
+	"sanddb/read_write"
 	"strconv"
 	"time"
 )
 
+// Handler is for each individual node to handle local read/write to file
+type Handler struct {
+	Node *read_write.Node
+}
+type CreateRequest struct {
+	TableName          string   `json:"table_name"`
+	PartitionKeyNames  []string `json:"partition_key_names"`
+	ClusteringKeyNames []string `json:"clustering_key_names"`
+}
 type EpochTime time.Time
 
-type Table []Partition
+type LocalData []Table
+type Table struct {
+	TableName          string      `json:"table_name"`
+	PartitionKeyNames  []string    `json:"partition_key_names"`
+	ClusteringKeyNames []string    `json:"clustering_key_names"`
+	Partitions         []Partition `json:"partitions"`
+}
 
 type Partition struct {
 	Metadata PartitionMetadata `json:"partition_metadata"`
@@ -15,11 +31,8 @@ type Partition struct {
 }
 
 type PartitionMetadata struct {
-	TableName          string   `json:"table_name"`
 	PartitionKey       int64    `json:"partition_key"`
-	PartitionKeyNames  []string `json:"partition_key_names"`
 	PartitionKeyValues []string `json:"partition_key_values"`
-	ClusteringKeyNames []string `json:"clustering_key_names"`
 }
 
 type Row struct {

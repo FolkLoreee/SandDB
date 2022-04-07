@@ -39,5 +39,7 @@ func (h *Handler) HandleRequest(c *fiber.Ctx) error {
 			_ = c.Send(body)
 		}
 	}
+	//TODO: Handle REQUEST_CREATE, broadcast to the other nodes to create the same table
+
 	return nil
 }
