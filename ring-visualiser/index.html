@@ -101,14 +101,17 @@
 
     <script>
 
+        let ports = ["8000", "8001", "8002", "8003"]
+
         var options = {
             series: [1, 1, 1, 1],
+            labels: ["8000", "8001", "8002", "8003"],
             chart: {
                 width: 380,
                 type: 'donut',
             },
             dataLabels: {
-                enabled: false
+                enabled: false,
             },
             responsive: [{
                 breakpoint: 480,
@@ -122,40 +125,40 @@
                 }
             }],
             legend: {
-                position: 'right',
-                offsetY: 0,
-                height: 230,
+                show: false,
+                // position: 'right',
+                // offsetY: 0,
+                // height: 230,
             }
         };
 
         var chart = new ApexCharts(document.querySelector("#chart"), options);
         chart.render();
 
-
         function appendData() {
             // send http post request
-            let xhr = new XMLHttpRequest();
-            const ports = ["8000", "8001", "8002", "8003"]
-            const port = ports[Math.floor(Math.random() * 10) - 6]
-            let url = "http://127.0.0.1:" + port
-            console.log(url)
-            xhr.open("POST", url);
-            xhr.setRequestHeader("Content-Type", "application/json");
+            // let xhr = new XMLHttpRequest();
+            // const ports = ["8000", "8001", "8002", "8003"]
+            // const port = ports[Math.floor(Math.random() * 10) - 6]
+            // let url = "http://127.0.0.1:" + port
+            // console.log(url)
+            // xhr.open("POST", url);
+            // xhr.setRequestHeader("Content-Type", "application/json");
 
-            xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                console.log(xhr.status);
-                console.log(xhr.responseText);
-            }};
+            // xhr.onreadystatechange = function () {
+            // if (xhr.readyState === 4) {
+            //     console.log(xhr.status);
+            //     console.log(xhr.responseText);
+            // }};
 
-            let data = `{
-                "type": 6,
-                "version": 0,
-                "content": "none",
-                "node_id": 0
-            }`;
+            // let data = `{
+            //     "type": 6,
+            //     "version": 0,
+            //     "content": "none",
+            //     "node_id": 0
+            // }`;
 
-            xhr.send(data);
+            // xhr.send(data);
 
             // add to array
             var arr = chart.w.globals.series.slice()
@@ -166,9 +169,10 @@
         function removeData() {
             // send http post request
             let xhr = new XMLHttpRequest();
-            const ports = ["8000", "8001", "8002", "8003"]
-            const port = ports[Math.floor(Math.random() * 10) - 6]
-            let url = "http://127.0.0.1:" + port
+            
+            console.log(options.labels)
+            port = options.labels[options.labels.length - 1]
+            let url = "http://127.0.0.1:" + port + "/killNode"
             console.log(url)
             xhr.open("POST", url);
             xhr.setRequestHeader("Content-Type", "application/json");
@@ -180,18 +184,16 @@
             }};
 
             let data = `{
-                "type": 6,
-                "version": 0,
-                "content": "none",
-                "node_id": 0
+                "type": 2,  
+                "content": "0"
             }`;
 
             xhr.send(data);
+            options.labels.pop()
+            options.series.pop()
+            console.log(options.labels, options.series)
 
-            // remove data from 
-            var arr = chart.w.globals.series.slice()
-            arr.pop()
-            return arr;
+            return options;
         }
 
         function reset() {
@@ -203,7 +205,7 @@
         })
 
         document.querySelector("#remove").addEventListener("click", function () {
-            chart.updateSeries(removeData())
+            chart.updateOptions(removeData())
         })
 
         document.querySelector("#reset").addEventListener("click", function () {
@@ -212,7 +214,5 @@
 
     </script>
 
-
 </body>
-
 </html>
