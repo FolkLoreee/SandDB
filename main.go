@@ -73,11 +73,12 @@ func main() {
 	ring.CurrentNode = node
 	app.Get("/", hello)
 	//TODO: split between read and write request
-	app.Post("/request", requestHandler.HandleRequest)
+	//app.Post("/request", requestHandler.HandleRequest)
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
+	app.Post("/insert", requestHandler.HandleClientWriteRequest)
 
 	internalGroup := app.Group("/internal")
-	internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
+	//internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
 	internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
 
 	dbHandler := &db.Handler{

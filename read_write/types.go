@@ -31,7 +31,7 @@ func (r RequestType) String() string {
 }
 
 type Handler struct {
-	Request       *Request
+	//Request       *Request
 	Node          *Node
 	Ring          *Ring
 	Timeout       time.Duration
@@ -68,7 +68,6 @@ type Request struct {
 //PeerMessage means message from other SandDB nodes
 type PeerMessage struct {
 	Type     MessageType `json:"type"`
-	Version  int         `json:"version"`
 	Content  string      `json:"content"`
 	SourceID int         `json:"node_id"`
 }
@@ -77,4 +76,13 @@ type CreateRequest struct {
 	TableName          string   `json:"table_name"`
 	PartitionKeyNames  []string `json:"partition_key_names"`
 	ClusteringKeyNames []string `json:"clustering_key_names"`
+}
+
+type WriteRequest struct {
+	TableName           string      `json:"table_name"`
+	PartitionKeyValues  []string    `json:"partition_keys"`
+	ClusteringKeyValues []string    `json:"clustering_keys"`
+	CellNames           []string    `json:"cell_names"`
+	CellValues          []string    `json:"cell_values"`
+	Type                MessageType `json:"type"`
 }

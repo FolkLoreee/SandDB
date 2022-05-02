@@ -10,25 +10,28 @@ import (
 )
 
 //TODO: HandleClientWriteRequest to take fiber context as an argument
-func (h *Handler) handleClientWriteRequest() error {
+func (h *Handler) HandleClientWriteRequest(c *fiber.Ctx) error {
+	var (
+		req WriteRequest
+	)
 	fmt.Printf("Request received from client by receiverNode %d.\n", h.Node.Id)
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+	partitionKeyConcat := ""
 	// Hash partition key sent by client
-	partitionKey := h.Request.Content
-	hashedPK := GetHash(partitionKey)
-	fmt.Printf("Partition key %s hashed to %d\n", partitionKey, hashedPK)
+	for _, partitionKey := range req.PartitionKeyValues {
+		partitionKeyConcat += partitionKey
+	}
+	hashedPK := GetHash(partitionKeyConcat)
+	fmt.Printf("Partition key %s hashed to %d\n", partitionKeyConcat, hashedPK)
 
 	fmt.Println("Node positions (hashes) in the ring:")
 	fmt.Println(h.Ring.NodeHashes)
 
 	// Look for the receiverNode
-	receiverNode := h.Ring.GetNode(partitionKey)
+	receiverNode := h.Ring.GetNode(partitionKeyConcat)
 	fmt.Printf("Routing request to receiverNode %d at position %d...\n", receiverNode.Id, receiverNode.Hash)
-	data := PeerMessage{
-		Type:     COORDINATOR_WRITE,
-		Version:  0,
-		Content:  h.Request.Content,
-		SourceID: h.Node.Id,
-	}
 	go h.collectReplies()
 
 	err := h.createQuorum(REQUEST_WRITE)
@@ -36,17 +39,18 @@ func (h *Handler) handleClientWriteRequest() error {
 		return err
 	}
 
-	err = h.sendWriteRequest(receiverNode, data)
+	req.Type = COORDINATOR_WRITE
+	err = h.sendWriteRequest(receiverNode, req)
 	if err != nil {
 		fmt.Printf("Error in sending coordinator request: %s", err.Error())
 		return err
 	}
 	fmt.Printf("Ring replication factor is %d.\n", h.Ring.ReplicationFactor)
 
-	nodesToReplicateTo := h.Ring.Replicate(partitionKey)
+	nodesToReplicateTo := h.Ring.Replicate(partitionKeyConcat)
 	for _, replNode := range nodesToReplicateTo {
 		fmt.Printf("Replicating to node with hash %d\n", replNode.Hash)
-		err = h.sendWriteRequest(replNode, data)
+		err = h.sendWriteRequest(replNode, req)
 		if err != nil {
 			fmt.Printf("Error in sending coordinator replication message: %s", err.Error())
 			return err
@@ -59,12 +63,12 @@ func (h *Handler) handleClientWriteRequest() error {
 
 	return nil
 }
-func (h *Handler) sendWriteRequest(node *Node, data PeerMessage) error {
+func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
 	var (
 		responseMsg PeerMessage
 	)
 	fmt.Printf("Sending coordinator request to node with hash %d.\n", node.Hash)
-	body, err := json.Marshal(data)
+	body, err := json.Marshal(req)
 	if err != nil {
 		fmt.Printf("Error in marshalling coordinator request: %s", err.Error())
 		return err
@@ -78,14 +82,13 @@ func (h *Handler) sendWriteRequest(node *Node, data PeerMessage) error {
 	}
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
-
-	err = json.Unmarshal([]byte(jsonResponse), &responseMsg)
+	err = json.Unmarshal(jsonResponse, &responseMsg)
 	if err != nil {
 		return err
 	}
 
 	//READ_REPAIR does not require quorum
-	if data.Type == COORDINATOR_WRITE {
+	if req.Type == COORDINATOR_WRITE {
 		h.QuorumChannel <- responseMsg
 	}
 	fmt.Printf("Successfully routed request: %s\n\n", string(jsonResponse))
