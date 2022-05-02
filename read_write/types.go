@@ -70,6 +70,7 @@ type PeerMessage struct {
 	Type     MessageType `json:"type"`
 	Content  string      `json:"content"`
 	SourceID int         `json:"node_id"`
+	Version  int         `json:"version"`
 }
 
 type CreateRequest struct {
@@ -84,5 +85,12 @@ type WriteRequest struct {
 	ClusteringKeyValues []string    `json:"clustering_keys"`
 	CellNames           []string    `json:"cell_names"`
 	CellValues          []string    `json:"cell_values"`
+	Type                MessageType `json:"type"`
+}
+
+type ReadRequest struct {
+	TableName           string      `json:"table_name"`
+	PartitionKeyValues  []string    `json:"partition_keys"`
+	ClusteringKeyValues []string    `json:"clustering_keys"`
 	Type                MessageType `json:"type"`
 }
