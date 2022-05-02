@@ -12,6 +12,8 @@ const (
 	REQUEST_READ
 	REQUEST_CREATE
 )
+
+//TODO: PeerMessage types are now limited to ACKs (and possibly gossip stuff)
 const (
 	COORDINATOR_WRITE MessageType = iota
 	COORDINATOR_READ
@@ -23,6 +25,7 @@ const (
 	WRITE_OK
 )
 
+//TODO: remove this and have 2 request types instead
 func (r RequestType) String() string {
 	return [...]string{"Write", "Read"}[r]
 }
@@ -61,6 +64,7 @@ type Request struct {
 	SourceID int         `json:"node_id"`
 }
 
+//TODO: Remove version and content from PeerMessage
 //PeerMessage means message from other SandDB nodes
 type PeerMessage struct {
 	Type     MessageType `json:"type"`

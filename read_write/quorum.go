@@ -9,6 +9,7 @@ import (
 
 func (h *Handler) createQuorum(requestType RequestType) error {
 	h.Responses = 0
+	//Create Request has to be replicated to all nodes, not just replicas
 	if requestType == REQUEST_CREATE {
 		h.Ring.MinVotes = int(math.Ceil(float64(len(h.Ring.Nodes) / 2)))
 	} else {

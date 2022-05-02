@@ -72,6 +72,7 @@ func main() {
 	}
 	ring.CurrentNode = node
 	app.Get("/", hello)
+	//TODO: split between read and write request
 	app.Post("/request", requestHandler.HandleRequest)
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
 

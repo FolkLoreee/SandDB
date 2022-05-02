@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+//TODO: HandleClientWriteRequest to take fiber context as an argument
 func (h *Handler) handleClientWriteRequest() error {
 	fmt.Printf("Request received from client by receiverNode %d.\n", h.Node.Id)
 	// Hash partition key sent by client
