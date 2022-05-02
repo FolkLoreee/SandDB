@@ -1,0 +1,89 @@
+# github.com/andybalholm/brotli v1.0.4
+github.com/andybalholm/brotli
+# github.com/fsnotify/fsnotify v1.5.1
+github.com/fsnotify/fsnotify
+# github.com/gofiber/fiber/v2 v2.27.0
+## explicit
+github.com/gofiber/fiber/v2
+github.com/gofiber/fiber/v2/internal/bytebufferpool
+github.com/gofiber/fiber/v2/internal/colorable
+github.com/gofiber/fiber/v2/internal/dictpool
+github.com/gofiber/fiber/v2/internal/fwd
+github.com/gofiber/fiber/v2/internal/go-json
+github.com/gofiber/fiber/v2/internal/go-json/decoder
+github.com/gofiber/fiber/v2/internal/go-json/encoder
+github.com/gofiber/fiber/v2/internal/go-json/encoder/vm
+github.com/gofiber/fiber/v2/internal/go-json/encoder/vm_color
+github.com/gofiber/fiber/v2/internal/go-json/encoder/vm_color_indent
+github.com/gofiber/fiber/v2/internal/go-json/encoder/vm_indent
+github.com/gofiber/fiber/v2/internal/go-json/errors
+github.com/gofiber/fiber/v2/internal/go-json/runtime
+github.com/gofiber/fiber/v2/internal/isatty
+github.com/gofiber/fiber/v2/internal/msgp
+github.com/gofiber/fiber/v2/internal/schema
+github.com/gofiber/fiber/v2/internal/uuid
+github.com/gofiber/fiber/v2/utils
+# github.com/hashicorp/hcl v1.0.0
+github.com/hashicorp/hcl
+github.com/hashicorp/hcl/hcl/ast
+github.com/hashicorp/hcl/hcl/parser
+github.com/hashicorp/hcl/hcl/printer
+github.com/hashicorp/hcl/hcl/scanner
+github.com/hashicorp/hcl/hcl/strconv
+github.com/hashicorp/hcl/hcl/token
+github.com/hashicorp/hcl/json/parser
+github.com/hashicorp/hcl/json/scanner
+github.com/hashicorp/hcl/json/token
+# github.com/klauspost/compress v1.14.1
+github.com/klauspost/compress
+github.com/klauspost/compress/flate
+github.com/klauspost/compress/gzip
+github.com/klauspost/compress/zlib
+# github.com/magiconair/properties v1.8.5
+github.com/magiconair/properties
+# github.com/mitchellh/mapstructure v1.4.3
+github.com/mitchellh/mapstructure
+# github.com/pelletier/go-toml v1.9.4
+github.com/pelletier/go-toml
+# github.com/pkg/errors v0.8.1
+## explicit
+github.com/pkg/errors
+# github.com/spf13/afero v1.6.0
+github.com/spf13/afero
+github.com/spf13/afero/mem
+# github.com/spf13/cast v1.4.1
+github.com/spf13/cast
+# github.com/spf13/jwalterweatherman v1.1.0
+github.com/spf13/jwalterweatherman
+# github.com/spf13/pflag v1.0.5
+github.com/spf13/pflag
+# github.com/spf13/viper v1.10.1
+## explicit
+github.com/spf13/viper
+github.com/spf13/viper/internal/encoding
+github.com/spf13/viper/internal/encoding/hcl
+github.com/spf13/viper/internal/encoding/json
+github.com/spf13/viper/internal/encoding/toml
+github.com/spf13/viper/internal/encoding/yaml
+# github.com/subosito/gotenv v1.2.0
+github.com/subosito/gotenv
+# github.com/valyala/bytebufferpool v1.0.0
+github.com/valyala/bytebufferpool
+# github.com/valyala/fasthttp v1.33.0
+github.com/valyala/fasthttp
+github.com/valyala/fasthttp/fasthttputil
+github.com/valyala/fasthttp/reuseport
+github.com/valyala/fasthttp/stackless
+# github.com/valyala/tcplisten v1.0.0
+github.com/valyala/tcplisten
+# golang.org/x/sys v0.0.0-20220111092808-5a964db01320
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.7
+golang.org/x/text/transform
+golang.org/x/text/unicode/norm
+# gopkg.in/ini.v1 v1.66.2
+gopkg.in/ini.v1
+# gopkg.in/yaml.v2 v2.4.0
+gopkg.in/yaml.v2

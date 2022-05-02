@@ -3,7 +3,9 @@ package db
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -23,9 +25,16 @@ func ReadJSON(filename string) (LocalData, error) {
 
 	return localData, nil
 }
-
-func PersistTable(filename string, table Table) error {
-	data, _ := ReadJSON(filename)
+func CheckTableExists(tableName string, data LocalData) error {
+	for _, table := range data {
+		if table.TableName == tableName {
+			errMsg := fmt.Sprintf("Table %s already exists.", tableName)
+			return fiber.NewError(http.StatusBadRequest, errMsg)
+		}
+	}
+	return nil
+}
+func PersistTable(data LocalData, filename string, table Table) error {
 	data = append(data, table)
 	//MarshalIndent instead of Marshal for legibility during debug
 	jsonFile, err := json.MarshalIndent(data, "", "")

@@ -12,11 +12,17 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 	var (
 		reqBody read_write.CreateRequest
 	)
-
-	//TODO: check if table name already exists
-	err := c.BodyParser(&reqBody)
+	filename := fmt.Sprintf("%d/table.json", h.Node.Id)
+	localData, err := ReadJSON(filename)
+	err = c.BodyParser(&reqBody)
 	if err != nil {
 		_ = c.SendStatus(http.StatusInternalServerError)
+		return err
+	}
+	err = CheckTableExists(reqBody.TableName, localData)
+	if err != nil {
+		errBody, _ := json.Marshal(err)
+		_ = c.Status(http.StatusBadRequest).Send(errBody)
 		return err
 	}
 	partitions := make([]Partition, 0)
@@ -27,8 +33,7 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 		Partitions:         partitions,
 	}
 
-	filename := fmt.Sprintf("%d/%d.json", h.Node.Id, h.Node.Id)
-	err = PersistTable(filename, table)
+	err = PersistTable(localData, filename, table)
 	if err != nil {
 		_ = c.SendStatus(http.StatusInternalServerError)
 		return err
@@ -44,7 +49,7 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 		_ = c.SendStatus(http.StatusInternalServerError)
 		return err
 	}
-	_ = c.Send(resp)
+	_ = c.Status(http.StatusCreated).Send(resp)
 	fmt.Printf("Finished creating Table: %s", table.TableName)
 	return nil
 }

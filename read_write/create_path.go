@@ -3,6 +3,7 @@ package read_write
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
@@ -23,18 +24,18 @@ func (h *Handler) HandleClientCreateRequest(c *fiber.Ctx) error {
 		return err
 	}
 	for _, receiverNode := range h.Ring.Nodes {
-		//if receiverNode.Id != h.Node.Id {
 		err = h.sendCreateRequest(receiverNode, request)
 		if err != nil {
-			fmt.Printf("Error in sending coordinator request: %s\n", err.Error())
+			fmt.Printf("Error in sending coordinator request to %d: %s\n", receiverNode.Id, err.Error())
+			return err
 		}
-		//}
 	}
 	err = h.closeQuorum()
 	if err != nil {
 		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
 	}
-	_ = c.SendStatus(http.StatusOK)
+	successMsg := fmt.Sprintf("Table %s has been successfully created!", request.TableName)
+	_ = c.Status(http.StatusCreated).SendString(successMsg)
 	return nil
 }
 
@@ -57,6 +58,9 @@ func (h *Handler) sendCreateRequest(node *Node, data CreateRequest) error {
 	}
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
+	if response.StatusCode != http.StatusCreated {
+		return errors.New(string(jsonResponse))
+	}
 	err = json.Unmarshal([]byte(jsonResponse), &responseMsg)
 	if err != nil {
 		fmt.Printf("Error in unmarshalling: %s\n", err.Error())
