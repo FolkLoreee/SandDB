@@ -82,6 +82,7 @@ type CreateRequest struct {
 type WriteRequest struct {
 	TableName           string      `json:"table_name"`
 	PartitionKeyValues  []string    `json:"partition_keys"`
+	HashedPK            int64       `json:"pk_hash"`
 	ClusteringKeyValues []string    `json:"clustering_keys"`
 	CellNames           []string    `json:"cell_names"`
 	CellValues          []string    `json:"cell_values"`

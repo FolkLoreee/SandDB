@@ -77,9 +77,9 @@ func main() {
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
 	app.Post("/insert", requestHandler.HandleClientWriteRequest)
 	app.Post("/read", requestHandler.HandleClientReadRequest)
-	internalGroup := app.Group("/internal")
+	//internalGroup := app.Group("/internal")
 	//internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
-	internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
+	//internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
 
 	dbHandler := &db.Handler{
 		Node: node,

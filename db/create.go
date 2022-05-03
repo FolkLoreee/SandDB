@@ -19,21 +19,23 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 		_ = c.SendStatus(http.StatusInternalServerError)
 		return err
 	}
-	err = CheckTableExists(reqBody.TableName, localData)
-	if err != nil {
+	tableExists := CheckTableExists(reqBody.TableName, localData)
+	if tableExists {
+		errMsg := fmt.Sprintf("Table %s already exists.", reqBody.TableName)
+		err = fiber.NewError(http.StatusBadRequest, errMsg)
 		errBody, _ := json.Marshal(err)
 		_ = c.Status(http.StatusBadRequest).Send(errBody)
 		return err
 	}
-	partitions := make([]Partition, 0)
-	table := Table{
+	partitions := make([]*Partition, 0)
+	table := &Table{
 		TableName:          reqBody.TableName,
 		PartitionKeyNames:  reqBody.PartitionKeyNames,
 		ClusteringKeyNames: reqBody.ClusteringKeyNames,
 		Partitions:         partitions,
 	}
 
-	err = PersistTable(localData, filename, table)
+	err = PersistNewTable(localData, filename, table)
 	if err != nil {
 		_ = c.SendStatus(http.StatusInternalServerError)
 		return err

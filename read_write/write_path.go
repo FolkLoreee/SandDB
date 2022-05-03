@@ -24,6 +24,7 @@ func (h *Handler) HandleClientWriteRequest(c *fiber.Ctx) error {
 		partitionKeyConcat += partitionKey
 	}
 	hashedPK := GetHash(partitionKeyConcat)
+	req.HashedPK = hashedPK
 	fmt.Printf("Partition key %s hashed to %d\n", partitionKeyConcat, hashedPK)
 
 	fmt.Println("Node positions (hashes) in the ring:")
@@ -74,7 +75,7 @@ func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
 		return err
 	}
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(node.IPAddress+node.Port+"/internal/write", "application/json", postBody)
+	response, err := http.Post(node.IPAddress+node.Port+"/db/", "application/json", postBody)
 
 	if err != nil {
 		fmt.Printf("Error in posting coordinator request: %s", err.Error())
@@ -82,6 +83,7 @@ func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
 	}
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
+	fmt.Println("RESPONSE: ", jsonResponse)
 	err = json.Unmarshal(jsonResponse, &responseMsg)
 	if err != nil {
 		return err
@@ -96,26 +98,26 @@ func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
 	return nil
 }
 
-func (h *Handler) HandleCoordinatorWrite(c *fiber.Ctx) error {
-	var (
-		requestMsg PeerMessage
-	)
-	reply := &PeerMessage{
-		Type:     WRITE_ACK,
-		Content:  "1",
-		SourceID: h.Node.Id,
-	}
-	err := c.BodyParser(&requestMsg)
-	if err != nil {
-		return err
-	}
-	resp, err := json.Marshal(reply)
-	if err != nil {
-		_ = c.SendStatus(http.StatusInternalServerError)
-		return err
-	}
-	_ = c.Send(resp)
-	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
-	fmt.Printf("Content received: %s.\n", requestMsg.Content)
-	return nil
-}
+//func (h *Handler) HandleCoordinatorWrite(c *fiber.Ctx) error {
+//	var (
+//		requestMsg PeerMessage
+//	)
+//	reply := &PeerMessage{
+//		Type:     WRITE_ACK,
+//		Content:  "1",
+//		SourceID: h.Node.Id,
+//	}
+//	err := c.BodyParser(&requestMsg)
+//	if err != nil {
+//		return err
+//	}
+//	resp, err := json.Marshal(reply)
+//	if err != nil {
+//		_ = c.SendStatus(http.StatusInternalServerError)
+//		return err
+//	}
+//	_ = c.Send(resp)
+//	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
+//	fmt.Printf("Content received: %s.\n", requestMsg.Content)
+//	return nil
+//}

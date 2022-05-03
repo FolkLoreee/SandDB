@@ -12,19 +12,23 @@ type Handler struct {
 }
 type EpochTime time.Time
 
-type LocalData []Table
+type LocalData []*Table
 type Table struct {
-	TableName          string      `json:"table_name"`
-	PartitionKeyNames  []string    `json:"partition_key_names"`
-	ClusteringKeyNames []string    `json:"clustering_key_names"`
-	Partitions         []Partition `json:"partitions"`
+	TableName          string       `json:"table_name"`
+	PartitionKeyNames  []string     `json:"partition_key_names"`
+	ClusteringKeyNames []string     `json:"clustering_key_names"`
+	Partitions         []*Partition `json:"partitions"`
 }
 
 type Partition struct {
-	Metadata PartitionMetadata `json:"partition_metadata"`
-	Rows     []Row             `json:"rows"`
+	Metadata *PartitionMetadata `json:"partition_metadata"`
+	Rows     []*Row             `json:"rows"`
 }
 
+/* PartitionMetadata
+PartitionKey: hash value of the concatenated partition keys
+PartitionKeyValues: values of the table's partition keys
+*/
 type PartitionMetadata struct {
 	PartitionKey       int64    `json:"partition_key"`
 	PartitionKeyValues []string `json:"partition_key_values"`
@@ -36,7 +40,7 @@ type Row struct {
 	DeletedAt           EpochTime `json:"deleted_at"`
 	ClusteringKeyHash   int64     `json:"clustering_key_hash"`
 	ClusteringKeyValues []string  `json:"clustering_key_values"`
-	Cells               []Cell    `json:"cells"`
+	Cells               []*Cell   `json:"cells"`
 }
 
 type Cell struct {
