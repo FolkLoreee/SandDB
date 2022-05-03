@@ -768,8 +768,27 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 		}
 	}
 
-	// Sort the data based on table name, partition key, and clustering key hash before writing to file
-	sort.Slice(data, func(i, j int) bool {
+	// Sort the rows in each partition
+	for _, table := range data {
+		for _, partition := range table.Partitions {
+			sort.SliceStable(partition.Rows, func(i, j int) bool {
+				return partition.Rows[i].ClusteringKeyHash < partition.Rows[j].ClusteringKeyHash
+			})
+		}
+	}
+
+	// Sort the partitions in each table
+	for _, table := range data {
+		sort.SliceStable(table.Partitions, func(i, j int) bool {
+			if table.Partitions[i].Metadata.PartitionKey == table.Partitions[j].Metadata.PartitionKey {
+				return table.Partitions[i].Rows[0].ClusteringKeyHash < table.Partitions[j].Rows[0].ClusteringKeyHash
+			}
+			return table.Partitions[i].Metadata.PartitionKey < table.Partitions[j].Metadata.PartitionKey
+		})
+	}
+
+	// Sort the tables based on table name, partition key, and clustering key hash before writing to file
+	sort.SliceStable(data, func(i, j int) bool {
 		if data[i].TableName == data[j].TableName {
 			if data[i].Partitions[0].Metadata.PartitionKey == data[j].Partitions[0].Metadata.PartitionKey {
 				return data[i].Partitions[0].Rows[0].ClusteringKeyHash < data[j].Partitions[0].Rows[0].ClusteringKeyHash
