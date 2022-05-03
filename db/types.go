@@ -1,14 +1,14 @@
 package db
 
 import (
-	"sanddb/read_write"
+	"sanddb/utils"
 	"strconv"
 	"time"
 )
 
 // Handler is for each individual node to handle local read/write to file
 type Handler struct {
-	Node *read_write.Node
+	Node *utils.Node
 }
 type EpochTime time.Time
 
@@ -84,4 +84,9 @@ func (t EpochTime) Time() time.Time {
 // String returns t as a formatted string
 func (t EpochTime) String() string {
 	return t.Time().String()
+}
+
+type ReadResponse struct {
+	SourceNode *utils.Node
+	Row        Row
 }

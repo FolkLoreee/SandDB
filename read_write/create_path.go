@@ -8,18 +8,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"net/http"
+	"sanddb/messages"
+	"sanddb/utils"
 )
 
 func (h *Handler) HandleClientCreateRequest(c *fiber.Ctx) error {
 	var (
-		request CreateRequest
+		request messages.CreateRequest
 	)
 	err := c.BodyParser(&request)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("Request received from client by receiverNode %d.\n", h.Node.Id)
-	err = h.createQuorum(REQUEST_CREATE)
+	err = h.createQuorum(messages.REQUEST_CREATE)
 	if err != nil {
 		return err
 	}
@@ -39,9 +41,9 @@ func (h *Handler) HandleClientCreateRequest(c *fiber.Ctx) error {
 	return nil
 }
 
-func (h *Handler) sendCreateRequest(node *Node, data CreateRequest) error {
+func (h *Handler) sendCreateRequest(node *utils.Node, data messages.CreateRequest) error {
 	var (
-		responseMsg PeerMessage
+		responseMsg messages.PeerMessage
 	)
 	fmt.Printf("Sending coordinator request to node with has %d\n", node.Hash)
 	body, err := json.Marshal(data)

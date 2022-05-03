@@ -9,6 +9,7 @@ import (
 	c "sanddb/config"
 	"sanddb/db"
 	"sanddb/read_write"
+	"sanddb/utils"
 	"strconv"
 	"time"
 )
@@ -21,13 +22,13 @@ func hello(c *fiber.Ctx) error {
 	return err
 }
 
-func setupRing(config c.Configurations) *read_write.Ring {
+func setupRing(config c.Configurations) *utils.Ring {
 	ring := &config.Ring
-	ring.NodeMap = make(map[int64]*read_write.Node)
+	ring.NodeMap = make(map[int64]*utils.Node)
 	ring.ReplicationFactor = config.ReplicationFactor
 
 	for _, node := range ring.Nodes {
-		node.Hash = read_write.GetHash(strconv.Itoa(node.Id))
+		node.Hash = utils.GetHash(strconv.Itoa(node.Id))
 		ring.NodeMap[node.Hash] = node
 		ring.NodeHashes = append(ring.NodeHashes, node.Hash)
 	}
@@ -55,11 +56,11 @@ func main() {
 	}
 	nodeID, err := strconv.Atoi(args[1])
 	//initialize a Node
-	node := &read_write.Node{
+	node := &utils.Node{
 		Id:        nodeID,
 		IPAddress: config.Ring.Nodes[nodeID].IPAddress,
 		Port:      config.Ring.Nodes[nodeID].Port,
-		Hash:      read_write.GetHash(strconv.Itoa(nodeID)),
+		Hash:      utils.GetHash(strconv.Itoa(nodeID)),
 	}
 	fmt.Printf("Node #%d: Hash: %d", node.Id, node.Hash)
 	// Initialize the Ring
@@ -85,8 +86,9 @@ func main() {
 		Node: node,
 	}
 	dbGroup := app.Group("/db")
-	dbGroup.Post("/", dbHandler.HandleDBInsert)
+	dbGroup.Post("/insert", dbHandler.HandleDBInsert)
 	dbGroup.Post("/new", dbHandler.HandleCreateTable)
+	dbGroup.Post("/read", dbHandler.HandleDBRead)
 	err = app.Listen(node.Port)
 	if err != nil {
 		log.Fatalf("Error in starting up server: %s", err)

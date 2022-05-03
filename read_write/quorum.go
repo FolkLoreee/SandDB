@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	. "sanddb/messages"
 	"time"
 )
 
@@ -31,19 +32,15 @@ func (h *Handler) closeQuorum() error {
 	} else {
 		fmt.Println("Insufficient Quorum")
 		fmt.Printf("Node %d: Number of votes received: %d\tNumber of votes required:%d\n", h.Node.Id, h.Responses, h.Ring.MinVotes)
-		return errors.New("write failed: insufficient ACKs")
+		return errors.New("insufficient ACKs")
 	}
 }
 
 func (h *Handler) collectReplies() {
 	//TODO: channel should close and node should move on once quorum is reached
-	node := h.Node
 	for {
 		select {
-		case reply := <-h.QuorumChannel:
-			if reply.Type == READ_OK {
-				node.DataStore[reply.SourceID] = reply
-			}
+		case _ = <-h.QuorumChannel:
 			h.Responses++
 			fmt.Printf("Data received. Current ACKs: %d\n", h.Responses)
 		case <-time.After(h.Timeout):

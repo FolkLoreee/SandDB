@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
-	"sanddb/read_write"
+	"sanddb/messages"
 )
 
 func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 	var (
-		reqBody read_write.CreateRequest
+		reqBody messages.CreateRequest
 	)
 	filename := fmt.Sprintf("%d/table.json", h.Node.Id)
 	localData, err := ReadJSON(filename)
@@ -41,8 +41,8 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 		return err
 	}
 	//TODO: reply to the coordinator that node manages to create table
-	responseMsg := &read_write.PeerMessage{
-		Type:     read_write.CREATE_ACK,
+	responseMsg := &messages.PeerMessage{
+		Type:     messages.CREATE_ACK,
 		Content:  "1",
 		SourceID: h.Node.Id,
 	}

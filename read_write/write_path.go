@@ -7,12 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"net/http"
+	"sanddb/messages"
+	"sanddb/utils"
 )
 
 //TODO: HandleClientWriteRequest to take fiber context as an argument
 func (h *Handler) HandleClientWriteRequest(c *fiber.Ctx) error {
 	var (
-		req WriteRequest
+		req messages.WriteRequest
 	)
 	fmt.Printf("Request received from client by receiverNode %d.\n", h.Node.Id)
 	if err := c.BodyParser(&req); err != nil {
@@ -23,7 +25,7 @@ func (h *Handler) HandleClientWriteRequest(c *fiber.Ctx) error {
 	for _, partitionKey := range req.PartitionKeyValues {
 		partitionKeyConcat += partitionKey
 	}
-	hashedPK := GetHash(partitionKeyConcat)
+	hashedPK := utils.GetHash(partitionKeyConcat)
 	req.HashedPK = hashedPK
 	fmt.Printf("Partition key %s hashed to %d\n", partitionKeyConcat, hashedPK)
 
@@ -35,12 +37,12 @@ func (h *Handler) HandleClientWriteRequest(c *fiber.Ctx) error {
 	fmt.Printf("Routing request to receiverNode %d at position %d...\n", receiverNode.Id, receiverNode.Hash)
 	go h.collectReplies()
 
-	err := h.createQuorum(REQUEST_WRITE)
+	err := h.createQuorum(messages.REQUEST_WRITE)
 	if err != nil {
 		return err
 	}
 
-	req.Type = COORDINATOR_WRITE
+	req.Type = messages.COORDINATOR_WRITE
 	err = h.sendWriteRequest(receiverNode, req)
 	if err != nil {
 		fmt.Printf("Error in sending coordinator request: %s", err.Error())
@@ -64,9 +66,9 @@ func (h *Handler) HandleClientWriteRequest(c *fiber.Ctx) error {
 
 	return nil
 }
-func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
+func (h *Handler) sendWriteRequest(node *utils.Node, req messages.WriteRequest) error {
 	var (
-		responseMsg PeerMessage
+		responseMsg messages.PeerMessage
 	)
 	fmt.Printf("Sending coordinator request to node with hash %d.\n", node.Hash)
 	body, err := json.Marshal(req)
@@ -75,7 +77,7 @@ func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
 		return err
 	}
 	postBody := bytes.NewBuffer(body)
-	response, err := http.Post(node.IPAddress+node.Port+"/db/", "application/json", postBody)
+	response, err := http.Post(node.IPAddress+node.Port+"/db/insert", "application/json", postBody)
 
 	if err != nil {
 		fmt.Printf("Error in posting coordinator request: %s", err.Error())
@@ -83,14 +85,13 @@ func (h *Handler) sendWriteRequest(node *Node, req WriteRequest) error {
 	}
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
-	fmt.Println("RESPONSE: ", jsonResponse)
 	err = json.Unmarshal(jsonResponse, &responseMsg)
 	if err != nil {
 		return err
 	}
 
 	//READ_REPAIR does not require quorum
-	if req.Type == COORDINATOR_WRITE {
+	if req.Type == messages.COORDINATOR_WRITE {
 		h.QuorumChannel <- responseMsg
 	}
 	fmt.Printf("Successfully routed request: %s\n\n", string(jsonResponse))

@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
-	"sanddb/read_write"
+	"sanddb/messages"
+	"sanddb/utils"
 	"time"
 )
 
 func (h *Handler) HandleDBInsert(c *fiber.Ctx) error {
 	var (
-		reqBody read_write.WriteRequest
+		reqBody messages.WriteRequest
 	)
 	filename := fmt.Sprintf("%d/table.json", h.Node.Id)
 	localData, err := ReadJSON(filename)
@@ -30,7 +31,7 @@ func (h *Handler) HandleDBInsert(c *fiber.Ctx) error {
 	for _, clusteringKey := range reqBody.ClusteringKeyValues {
 		clusteringKeyConcat += clusteringKey
 	}
-	clusteringKeyHash := read_write.GetHash(clusteringKeyConcat)
+	clusteringKeyHash := utils.GetHash(clusteringKeyConcat)
 	updatedPartition := GetPartition(table, reqBody.HashedPK)
 	if updatedPartition == nil {
 		if err = createNewPartition(reqBody, table, clusteringKeyHash); err != nil {
@@ -44,8 +45,8 @@ func (h *Handler) HandleDBInsert(c *fiber.Ctx) error {
 	if err = PersistTable(localData, filename, table); err != nil {
 		return err
 	}
-	reply := &read_write.PeerMessage{
-		Type:     read_write.WRITE_ACK,
+	reply := &messages.PeerMessage{
+		Type:     messages.WRITE_ACK,
 		Content:  "1",
 		SourceID: h.Node.Id,
 	}
@@ -58,7 +59,7 @@ func (h *Handler) HandleDBInsert(c *fiber.Ctx) error {
 	return nil
 }
 
-func createNewPartition(req read_write.WriteRequest, table *Table, clusteringKeyHash int64) error {
+func createNewPartition(req messages.WriteRequest, table *Table, clusteringKeyHash int64) error {
 	metadata := &PartitionMetadata{
 		PartitionKey:       req.HashedPK,
 		PartitionKeyValues: req.PartitionKeyValues,
@@ -87,7 +88,7 @@ func createNewPartition(req read_write.WriteRequest, table *Table, clusteringKey
 	return nil
 }
 
-func updatePartition(partition *Partition, req read_write.WriteRequest, clusteringKeyHash int64) error {
+func updatePartition(partition *Partition, req messages.WriteRequest, clusteringKeyHash int64) error {
 	cells := make([]*Cell, 0)
 	for i := range req.CellNames {
 		cell := &Cell{
