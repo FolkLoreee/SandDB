@@ -9,14 +9,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/spf13/viper"
 	"os/signal"
 	"sanddb/db"
 	"sanddb/read_write"
 	"sanddb/utils"
 	"syscall"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/spf13/viper"
 )
 
 func hello(c *fiber.Ctx) error {
@@ -73,6 +74,23 @@ func setupRing(config c.Configurations) *utils.Ring {
 	return ring
 }
 
+func informRevive(h *read_write.Handler) {
+	ring := h.Ring
+
+	for _, node := range ring.Nodes {
+		if node.Id == h.Node.Id {
+			fmt.Printf("Revive node %d.\n", node.Id)
+			continue
+		}
+		fmt.Printf("Sending revive request to node %d.\n", node.Id)
+
+		// Inform nodes that this node is revived
+		h.SendReviveRequest(node)
+	}
+
+	fmt.Println("All nodes informed.")
+}
+
 func main() {
 	var (
 		config c.Configurations
@@ -113,6 +131,8 @@ func main() {
 		Timeout: time.Duration(config.Timeout) * time.Second,
 	}
 	ring.CurrentNode = node
+	// Inform of Node's existence
+	informRevive(requestHandler)
 	////Reading configuration files
 	//viper.SetConfigFile("./config/config.yml")
 	//if err := viper.ReadInConfig(); err != nil {
@@ -154,7 +174,6 @@ func main() {
 	internalGroup.Post("/repair/write_data", antiEntropyHandler.HandleRepairWriteRequest)
 	internalGroup.Post("/repair/trigger_delete", antiEntropyHandler.HandleRepairDeleteRequest)
 	internalGroup.Post("/repair/missing_subrepair", antiEntropyHandler.HandleMissingSubrepairRequest)
-	err = app.Listen(node.Port)
 	//app.Post("/request", requestHandler.HandleRequest)
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
 	app.Post("/insert", requestHandler.HandleClientWriteRequest)
@@ -164,6 +183,7 @@ func main() {
 	//internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
 	app.Post("/kill", requestHandler.HandleKillNode)
 	app.Post("/killNode", requestHandler.HandleClientKillRequest)
+	app.Post("/revive", requestHandler.HandleReviveNode)
 
 	dbHandler := &db.Handler{
 		Node: node,

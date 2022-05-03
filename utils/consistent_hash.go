@@ -69,3 +69,19 @@ func RemoveNodeHash(nodeHashes []int64, hash int64) []int64 {
 	}
 	return newNodeHashes
 }
+
+func AddNodeHash(nodeHashes []int64, hash int64) []int64 {
+	newNodeHashes := make([]int64, len(nodeHashes))
+	sortedHashes := Sort(nodeHashes)
+	for _, nHash := range sortedHashes {
+		// sort nodehashes
+		// if nodehash
+		if hash > nHash {
+			newNodeHashes = append(newNodeHashes, hash)
+		} else {
+			newNodeHashes = append(newNodeHashes, nHash)
+		}
+	}
+
+	return newNodeHashes
+}

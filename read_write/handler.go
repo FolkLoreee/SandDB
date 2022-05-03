@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"sanddb/messages"
 	"sanddb/utils"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 // Send a PeerMessage to other nodes and inform that node is killed
@@ -102,5 +103,70 @@ func (h *Handler) HandleClientKillRequest(c *fiber.Ctx) error {
 
 	os.Exit(0)
 
+	return nil
+}
+
+func (h *Handler) SendReviveRequest(node *utils.Node) error {
+	var responseMsg messages.PeerMessage
+	reviveRequest := messages.PeerMessage{
+		Type:     messages.REVIVED,
+		Content:  "Happy Easter!",
+		SourceID: h.Node.Id,
+	}
+	fmt.Printf("Sending revive message to node %d at port %s from node %d.\n", node.Id, node.Port, h.Node.Id)
+
+	body, err := json.Marshal(reviveRequest)
+	if err != nil {
+		fmt.Printf("Error in marshalling revive request: %s\n", err.Error())
+		return err
+	}
+	postBody := bytes.NewBuffer(body)
+
+	response, err := http.Post(node.IPAddress+node.Port+"/revive", "application/json", postBody)
+
+	if err != nil {
+		fmt.Printf("Error in posting revive request: %s\n", err.Error())
+		return err
+	}
+	defer response.Body.Close()
+	jsonResponse, err := ioutil.ReadAll(response.Body)
+
+	err = json.Unmarshal([]byte(jsonResponse), &responseMsg)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Successfully informed revive.")
+	return nil
+}
+
+func (h *Handler) HandleReviveNode(c *fiber.Ctx) error {
+	fmt.Println("Received revive request.")
+
+	var requestMsg messages.PeerMessage
+	reviveResponse := &messages.PeerMessage{
+		Type:     messages.REVIVED_ACK,
+		Content:  "Acknowledged revived node. Ring updated.",
+		SourceID: h.Node.Id,
+	}
+	err := c.BodyParser(&requestMsg)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(requestMsg)
+
+	fmt.Println(requestMsg.Type)
+	// update ring
+	h.UpdateRing(&requestMsg)
+
+	resp, err := json.Marshal(reviveResponse)
+	if err != nil {
+		_ = c.SendStatus(http.StatusInternalServerError)
+		return err
+	}
+	_ = c.Send(resp)
+	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
+	fmt.Printf("Content received: %s.\n", requestMsg.Content)
+	// fmt.Println(h.Ring.NodeHashes)
 	return nil
 }

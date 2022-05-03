@@ -13,6 +13,8 @@ const (
 	WRITE_OK
 	KILL
 	KILL_ACK
+	REVIVED
+	REVIVED_ACK
 )
 
 //PeerMessage means message from other SandDB nodes
