@@ -684,73 +684,87 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 
 	dataIsUpdated := false
 
-out:
-	for i, table := range data {
-		if table.TableName == requestData.TableName {
-			for j, partition := range table.Partitions {
-				if partition.Metadata.PartitionKey == requestData.Partitions[0].Metadata.PartitionKey {
-					for k, row := range partition.Rows {
-						if row.ClusteringKeyHash == requestData.Partitions[0].Rows[0].ClusteringKeyHash {
-							incomingData := requestData.Partitions[0].Rows[0]
-							// Additional check to only execute writing if the incoming data is actually newer than the existing data (which should always be the case if a write_data request is performed in the first place, but just in case)
-							if row.UpdatedAt.UnixNano() < incomingData.UpdatedAt.UnixNano() {
-								if !dataIsUpdated {
-									dataIsUpdated = true
-								}
-								// Update the row data
-								data[i].Partitions[j].Rows[k] = incomingData
-								break out
-							} else if row.UpdatedAt.UnixNano() == incomingData.UpdatedAt.UnixNano() {
-								incomingDataByteArray, err := json.Marshal(incomingData)
-								if err != nil {
-									log.Println("Error marshalling row:", err)
-									return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
-								}
-								currentDataByteArray, err := json.Marshal(row)
-								if err != nil {
-									log.Println("Error marshalling row:", err)
-									return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
-								}
-								compareResult := bytes.Compare(currentDataByteArray, incomingDataByteArray)
-								if compareResult < 0 {
+	// Edge case where there is no data in local file yet
+	if len(data) == 0 {
+		newTable := Table{
+			TableName:          requestData.TableName,
+			PartitionKeyNames:  requestData.PartitionKeyNames,
+			ClusteringKeyNames: requestData.ClusteringKeyNames,
+			Partitions:         requestData.Partitions,
+		}
+		data = append(data, newTable)
+		if !dataIsUpdated {
+			dataIsUpdated = true
+		}
+	} else {
+	out:
+		for i, table := range data {
+			if table.TableName == requestData.TableName {
+				for j, partition := range table.Partitions {
+					if partition.Metadata.PartitionKey == requestData.Partitions[0].Metadata.PartitionKey {
+						for k, row := range partition.Rows {
+							if row.ClusteringKeyHash == requestData.Partitions[0].Rows[0].ClusteringKeyHash {
+								incomingData := requestData.Partitions[0].Rows[0]
+								// Additional check to only execute writing if the incoming data is actually newer than the existing data (which should always be the case if a write_data request is performed in the first place, but just in case)
+								if row.UpdatedAt.UnixNano() < incomingData.UpdatedAt.UnixNano() {
 									if !dataIsUpdated {
 										dataIsUpdated = true
 									}
+									// Update the row data
 									data[i].Partitions[j].Rows[k] = incomingData
 									break out
+								} else if row.UpdatedAt.UnixNano() == incomingData.UpdatedAt.UnixNano() {
+									incomingDataByteArray, err := json.Marshal(incomingData)
+									if err != nil {
+										log.Println("Error marshalling row:", err)
+										return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
+									}
+									currentDataByteArray, err := json.Marshal(row)
+									if err != nil {
+										log.Println("Error marshalling row:", err)
+										return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
+									}
+									compareResult := bytes.Compare(currentDataByteArray, incomingDataByteArray)
+									if compareResult < 0 {
+										if !dataIsUpdated {
+											dataIsUpdated = true
+										}
+										data[i].Partitions[j].Rows[k] = incomingData
+										break out
+									}
 								}
+							} else {
+								// Add missing data
+								if !dataIsUpdated {
+									dataIsUpdated = true
+								}
+								data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
+								break out
 							}
-						} else {
-							// Add missing data
-							if !dataIsUpdated {
-								dataIsUpdated = true
-							}
-							data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
-							break out
 						}
+					} else {
+						// Add missing data
+						if !dataIsUpdated {
+							dataIsUpdated = true
+						}
+						data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
+						break out
 					}
-				} else {
-					// Add missing data
-					if !dataIsUpdated {
-						dataIsUpdated = true
-					}
-					data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
-					break out
 				}
+			} else {
+				// Add missing data
+				if !dataIsUpdated {
+					dataIsUpdated = true
+				}
+				newTable := Table{
+					TableName:          requestData.TableName,
+					PartitionKeyNames:  requestData.PartitionKeyNames,
+					ClusteringKeyNames: requestData.ClusteringKeyNames,
+					Partitions:         requestData.Partitions,
+				}
+				data = append(data, newTable)
+				break out
 			}
-		} else {
-			// Add missing data
-			if !dataIsUpdated {
-				dataIsUpdated = true
-			}
-			newTable := Table{
-				TableName:          requestData.TableName,
-				PartitionKeyNames:  requestData.PartitionKeyNames,
-				ClusteringKeyNames: requestData.ClusteringKeyNames,
-				Partitions:         requestData.Partitions,
-			}
-			data = append(data, newTable)
-			break out
 		}
 	}
 
@@ -1094,7 +1108,7 @@ func ExistingDataContains(existingData []RepairGetRequest, row RepairGetRequest)
 	return false
 }
 
-// TODO: Integration - use the functions from the read_write module instead and delete from this file (might also need to rethink the actual implementation of this since the hashes in r.NodeHashes might not always be strictly increasing)
+// TODO: Integration - use the functions from the read_write module instead and delete from this file (might also need to rethink the actual implementation of this since the hashes in r.NodeHashes might not always be strictly decreasing)
 func (r *Ring) Search(hash int64) int {
 	index := 0
 	for idx, nodeHash := range r.NodeHashes {

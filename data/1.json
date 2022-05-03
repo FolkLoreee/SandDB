@@ -12,18 +12,18 @@
         "rows": [
           {
             "created_at": 1464175401324444,
-            "updated_at": 1464175401324444,
+            "updated_at": 1464175401324450,
             "deleted_at": -1,
             "clustering_key_hash": 0,
             "clustering_key_values": ["AA-1"],
             "cells": [
               {
                 "name": "Bed",
-                "value": "666"
+                "value": "777"
               },
               {
                 "name": "Oxygen Tank",
-                "value": "666"
+                "value": "777"
               }
             ]
           }
