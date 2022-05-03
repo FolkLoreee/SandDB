@@ -16,3 +16,15 @@ content-type: application/json
     "type": 0,
     "content": "500"
 }
+###
+
+GET http://127.0.0.1:8888/hospital HTTP/1.1
+###
+
+POST http://127.0.0.1:8001/killNode HTTP/1.1
+Content-Type: application/json
+
+{
+    "type": 2,
+    "content": "0"
+}

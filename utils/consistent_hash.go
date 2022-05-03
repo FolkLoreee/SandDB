@@ -58,3 +58,14 @@ func (r *Ring) Replicate(partitionKey string) []*Node {
 // 	r.NodeHashes = nodeHashes
 // 	delete(r.Nodes, nodeHashes[index])
 // }
+
+func RemoveNodeHash(nodeHashes []int64, hash int64) []int64 {
+	newNodeHashes := make([]int64, len(nodeHashes))
+	for _, nHash := range nodeHashes {
+		if nHash == hash {
+			continue
+		}
+		newNodeHashes = append(newNodeHashes, nHash)
+	}
+	return newNodeHashes
+}

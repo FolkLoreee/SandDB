@@ -1,12 +1,19 @@
 package messages
 
+import "sanddb/utils"
+
 type RequestType int
 
 const (
 	REQUEST_WRITE RequestType = iota
 	REQUEST_READ
 	REQUEST_CREATE
+	REQUEST_KILL
 )
+
+func (r RequestType) String() string {
+	return [...]string{"Write", "Read", "Kill"}[r]
+}
 
 type CreateRequest struct {
 	TableName          string   `json:"table_name"`
@@ -30,4 +37,8 @@ type ReadRequest struct {
 	HashedPK            int64       `json:"pk_hash"`
 	ClusteringKeyValues []string    `json:"clustering_keys"`
 	Type                MessageType `json:"type"`
+}
+
+type KillRequest struct {
+	SourceNode *utils.Node `json:"source_node"`
 }

@@ -1,12 +1,24 @@
 package utils
 
+type NodeStatus int
+
+const (
+	ALIVE NodeStatus = iota
+	DEAD
+)
+
+func (s NodeStatus) String() string {
+	return [...]string{"Alive", "Dead"}[s]
+}
+
 type Node struct {
 	//DataStore is for coordinator to store responses from other nodes before being sent back to the client
 	//DataStore map[int]PeerMessage
-	Id        int    `json:"id"`
-	IPAddress string `json:"ip_address"`
-	Port      string `json:"port"`
-	Hash      int64  `json:"hash"`
+	Id        int        `json:"id"`
+	IPAddress string     `json:"ip_address"`
+	Port      string     `json:"port"`
+	Hash      int64      `json:"hash"`
+	Status    NodeStatus `json:"node_status"`
 }
 
 //Ring consists of multiple Nodes

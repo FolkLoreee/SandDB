@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
 	"log"
 	"os"
+	"os/signal"
 	c "sanddb/config"
 	"sanddb/db"
 	"sanddb/read_write"
 	"sanddb/utils"
 	"strconv"
+	"syscall"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/spf13/viper"
 )
 
 func hello(c *fiber.Ctx) error {
@@ -20,6 +24,40 @@ func hello(c *fiber.Ctx) error {
 		log.Fatalf("Error in hello world: %s", err)
 	}
 	return err
+}
+
+func gracefulShutdown(h *read_write.Handler) {
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, os.Interrupt)
+	signal.Notify(s, syscall.SIGTERM)
+	go func() {
+		<-s
+		fmt.Println("Shutting down gracefully.")
+		// // update node status to dead
+		// h.Node.Status = consistent_hashing.DEAD
+		// h.Ring.NodeMap[h.Node.Hash] = h.Node
+
+		// values := make([]*consistent_hashing.Node, 0, len(h.Ring.NodeMap))
+
+		// for _, v := range h.Ring.NodeMap {
+		// 	if v.Status == consistent_hashing.DEAD {
+		// 		continue
+		// 	}
+		// 	values = append(values, v)
+		// }
+		// h.Ring.Nodes = values
+		for _, node := range h.Ring.Nodes {
+			if node.Id == h.Node.Id {
+				fmt.Printf("Killed node %d.\n", node.Id)
+				continue
+			}
+			fmt.Printf("Sending kill request to node %d.\n", node.Id)
+
+			// inform nodes that this node is dead
+			h.SendKillRequest(node)
+		}
+		os.Exit(0)
+	}()
 }
 
 func setupRing(config c.Configurations) *utils.Ring {
@@ -40,6 +78,9 @@ func main() {
 		config c.Configurations
 	)
 	app := fiber.New()
+
+	app.Use(cors.New())
+
 	//Reading configuration files
 	viper.SetConfigFile("./config/config.yml")
 	if err := viper.ReadInConfig(); err != nil {
@@ -81,6 +122,8 @@ func main() {
 	//internalGroup := app.Group("/internal")
 	//internalGroup.Post("/read", requestHandler.HandleCoordinatorRead)
 	//internalGroup.Post("/write", requestHandler.HandleCoordinatorWrite)
+	app.Post("/kill", requestHandler.HandleKillNode)
+	app.Post("/killNode", requestHandler.HandleClientKillRequest)
 
 	dbHandler := &db.Handler{
 		Node: node,
@@ -89,6 +132,7 @@ func main() {
 	dbGroup.Post("/insert", dbHandler.HandleDBInsert)
 	dbGroup.Post("/new", dbHandler.HandleCreateTable)
 	dbGroup.Post("/read", dbHandler.HandleDBRead)
+	go gracefulShutdown(requestHandler)
 	err = app.Listen(node.Port)
 	if err != nil {
 		log.Fatalf("Error in starting up server: %s", err)
