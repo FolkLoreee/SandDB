@@ -186,6 +186,7 @@ func main() {
 	internalGroup.Post("/repair/write_data", antiEntropyHandler.HandleRepairWriteRequest)
 	internalGroup.Post("/repair/trigger_delete", antiEntropyHandler.HandleRepairDeleteRequest)
 	internalGroup.Post("/repair/missing_subrepair", antiEntropyHandler.HandleMissingSubrepairRequest)
+	// err = app.Listen(node.Port)
 	//app.Post("/request", requestHandler.HandleRequest)
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
 	app.Post("/insert", requestHandler.HandleClientWriteRequest)

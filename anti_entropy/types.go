@@ -58,6 +58,11 @@ type SubrepairRequest struct {
 	NodeID       int                `json:"node_id"`
 }
 
+type SubrepairResponse struct {
+	DataToAdd []RepairGetRequest `json:"data_to_add"`
+	NodeID    int                `json:"node_id"`
+}
+
 type RepairDeleteRequest struct {
 	NodeID int `json:"node_id"`
 }

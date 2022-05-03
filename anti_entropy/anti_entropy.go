@@ -3,8 +3,6 @@ package anti_entropy
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gofiber/fiber/v2"
-	"github.com/spaolacci/murmur3"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,6 +11,9 @@ import (
 	"sort"
 	"strconv"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/spaolacci/murmur3"
 )
 
 // This anti-entropy module should be delegated to a daemon that runs in the background at each node.
@@ -253,11 +254,11 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 	}
 
 	// Send missing subrepair requests (with existingData) to the replicas
-	subrepairRequest := SubrepairRequest{
-		ExistingData: existingData,
-		NodeID:       nodeID,
-	}
 	for i := 1; i < h.Ring.ReplicationFactor; i++ {
+		subrepairRequest := SubrepairRequest{
+			ExistingData: existingData,
+			NodeID:       nodeID,
+		}
 		subrepairRequestBody, err := json.Marshal(subrepairRequest)
 		if err != nil {
 			log.Println("Error marshalling request data:", err)
@@ -275,6 +276,20 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 			log.Println("Error performing POST request:", subrepairResponse.StatusCode)
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + subrepairResponse.Status)
 		}
+		// Append subrepair response to existingData
+		subrepairResponseBody, err := ioutil.ReadAll(subrepairResponse.Body)
+		if err != nil {
+			log.Println("Error reading response:", err)
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
+		}
+		var subrepairResponseData SubrepairResponse
+		err = json.Unmarshal(subrepairResponseBody, &subrepairResponseData)
+		if err != nil {
+			log.Println("Error unmarshalling response:", err)
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
+		}
+		existingData = append(existingData, subrepairResponseData.DataToAdd...)
+
 		if LAPLUS == NOTHING_CHANGED {
 			LAPLUS = SUCCESSFUL
 		}
@@ -309,7 +324,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 	}
 
 	// Request a primary range repair (not full repair) to all of the following nodes
-	for i := 1; i < h.Ring.ReplicationFactor; i++ {
+	for i := 1; i < len(h.Ring.NodeHashes); i++ {
 		replicaID := (nodeID + i) % len(h.Ring.NodeHashes)
 		primaryRangeRepairResponse, err := netClient.Post(h.Ring.Nodes[replicaID].IPAddress+h.Ring.Nodes[replicaID].Port+"/repair", "application/json", bytes.NewBuffer([]byte{}))
 		if err != nil {
@@ -531,11 +546,11 @@ func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 		}
 	}
 
-	subrepairRequest := SubrepairRequest{
-		ExistingData: existingData,
-		NodeID:       nodeID,
-	}
 	for i := 1; i < h.Ring.ReplicationFactor; i++ {
+		subrepairRequest := SubrepairRequest{
+			ExistingData: existingData,
+			NodeID:       nodeID,
+		}
 		subrepairRequestBody, err := json.Marshal(subrepairRequest)
 		if err != nil {
 			log.Println("Error marshalling request data:", err)
@@ -553,6 +568,19 @@ func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 			log.Println("Error performing POST request:", subrepairResponse.StatusCode)
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + subrepairResponse.Status)
 		}
+		subrepairResponseBody, err := ioutil.ReadAll(subrepairResponse.Body)
+		if err != nil {
+			log.Println("Error reading response:", err)
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
+		}
+		var subrepairResponseData SubrepairResponse
+		err = json.Unmarshal(subrepairResponseBody, &subrepairResponseData)
+		if err != nil {
+			log.Println("Error unmarshalling response:", err)
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
+		}
+		existingData = append(existingData, subrepairResponseData.DataToAdd...)
+
 		if LAPLUS == NOTHING_CHANGED {
 			LAPLUS = SUCCESSFUL
 		}
@@ -614,6 +642,7 @@ func (h *AntiEntropyHandler) HandleRepairGetRequest(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
 
+	// Default values if no corresponding row data is found
 	responseData := RepairGetResponse{
 		Data:   &db.Row{},
 		Hash:   -1,
@@ -646,7 +675,6 @@ func (h *AntiEntropyHandler) HandleRepairGetRequest(c *fiber.Ctx) error {
 		}
 	}
 
-	// If no corresponding row data is found
 	resp, err := json.Marshal(responseData)
 
 	if err != nil {
@@ -682,6 +710,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 	}
 
 	dataIsUpdated := false
+	dataIsFound := false
 
 	// Edge case where there is no data in local file yet
 	if len(data) == 0 {
@@ -703,6 +732,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 					if partition.Metadata.PartitionKey == requestData.Partitions[0].Metadata.PartitionKey {
 						for k, row := range partition.Rows {
 							if row.ClusteringKeyHash == requestData.Partitions[0].Rows[0].ClusteringKeyHash {
+								dataIsFound = true
 								incomingData := requestData.Partitions[0].Rows[0]
 								// Additional check to only execute writing if the incoming data is actually newer than the existing data (which should always be the case if a write_data request is performed in the first place, but just in case)
 								if row.UpdatedAt.UnixNano() < incomingData.UpdatedAt.UnixNano() {
@@ -732,37 +762,36 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 										break out
 									}
 								}
-							} else {
-								// Add missing data
-								if !dataIsUpdated {
-									dataIsUpdated = true
-								}
-								data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
-								break out
 							}
+						}
+						// Add missing data
+						if !dataIsUpdated && !dataIsFound {
+							dataIsUpdated = true
+							data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
+							break out
 						}
 					} else {
 						// Add missing data
-						if !dataIsUpdated {
+						if !dataIsUpdated && !dataIsFound {
 							dataIsUpdated = true
+							data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
+							break out
 						}
-						data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
-						break out
 					}
 				}
 			} else {
 				// Add missing data
-				if !dataIsUpdated {
+				if !dataIsUpdated && !dataIsFound {
 					dataIsUpdated = true
+					newTable := &db.Table{
+						TableName:          requestData.TableName,
+						PartitionKeyNames:  requestData.PartitionKeyNames,
+						ClusteringKeyNames: requestData.ClusteringKeyNames,
+						Partitions:         requestData.Partitions,
+					}
+					data = append(data, newTable)
+					break out
 				}
-				newTable := &db.Table{
-					TableName:          requestData.TableName,
-					PartitionKeyNames:  requestData.PartitionKeyNames,
-					ClusteringKeyNames: requestData.ClusteringKeyNames,
-					Partitions:         requestData.Partitions,
-				}
-				data = append(data, newTable)
-				break out
 			}
 		}
 	}
@@ -919,7 +948,10 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 
 	ring := h.Ring
 
-	dataIsUpdated := false
+	subrepairResponse := SubrepairResponse{
+		DataToAdd: []RepairGetRequest{},
+		NodeID:    nodeID,
+	}
 
 	for _, table := range data {
 		for _, partition := range table.Partitions {
@@ -935,6 +967,7 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 					}
 					// Execute repair only if data is not found in the attached existingData
 					if !ExistingDataContains(requestData.ExistingData, rowData) {
+						subrepairResponse.DataToAdd = append(subrepairResponse.DataToAdd, rowData)
 						dataFromReplicas := make([]RepairGetResponse, h.Ring.ReplicationFactor)
 						cells, err := json.Marshal(row)
 						if err != nil {
@@ -1095,9 +1128,6 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 								log.Println("Error performing POST request:", updateResponse.StatusCode)
 								return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + updateResponse.Status)
 							}
-							if !dataIsUpdated {
-								dataIsUpdated = true
-							}
 						}
 					}
 				}
@@ -1107,11 +1137,14 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 
 	log.Println("Replying to missing_subrepair request for repair by", requestData.NodeID)
 
-	if dataIsUpdated {
-		return c.Status(fiber.StatusOK).SendString("Successfully performed the requested missing subrepair for repair.")
-	} else {
-		return c.Status(fiber.StatusOK).SendString("No data was updated for repair.")
+	resp, err := json.Marshal(subrepairResponse)
+
+	if err != nil {
+		log.Println("Error marshalling row:", err)
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
+
+	return c.Status(fiber.StatusOK).Send(resp)
 }
 
 // Naive O(N) algorithm to determine if row data is present in the existing data

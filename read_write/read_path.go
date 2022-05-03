@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"net/http"
 	"sanddb/db"
 	"sanddb/messages"
 	"sanddb/utils"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func (h *Handler) HandleClientReadRequest(c *fiber.Ctx) error {
@@ -70,7 +71,7 @@ func (h *Handler) HandleClientReadRequest(c *fiber.Ctx) error {
 	if len(responses) > 1 {
 		// fmt.Println("Data collected from nodes:", node.DataStore)
 		for _, resp := range responses {
-			if resp.Row.UpdatedAt.UnixNano() > latestVersion.UpdatedAt.UnixNano() {
+			if latestVersion.ClusteringKeyHash == 0 || resp.Row.UpdatedAt.UnixNano() > latestVersion.UpdatedAt.UnixNano() {
 				latestVersion.CreatedAt = resp.Row.CreatedAt
 				latestVersion.UpdatedAt = resp.Row.UpdatedAt
 				latestVersion.DeletedAt = resp.Row.DeletedAt
