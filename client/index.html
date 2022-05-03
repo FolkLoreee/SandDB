@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla JavaScript Todo App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="container">
+    <h1>Client App</h1>
+    
+    <div class="main" id="create"> 
+        <form id="create">
+            <input id="create-table" type="text" placeholder="Enter Table Name">
+            <input id="create-hospitalID" type="text" placeholder="Enter Hospital ID">
+            <input id="create-department" type="text" placeholder="Enter Department">
+            <input id="create-room" type="text" placeholder="Enter Room ID">
+            <button id="create" type="submit">Create Table</button>
+        </form>
+        <h3 id="create-result"></h3>
+    </div>
+
+    <div class="main" id="insert"> 
+        <form id="insert">
+            <input id="insert-table" type="text" placeholder="Enter Table Name">
+            <input id="insert-hospitalID" type="text" placeholder="Enter Hospital ID">
+            <input id="insert-department" type="text" placeholder="Enter Department">
+            <input id="insert-room" type="text" placeholder="Enter Room ID">
+            <input id="resource-name" type="text" placeholder="Enter Resource Name">
+            <input id="resource-value" type="text" placeholder="Enter Resource Amount">
+            <button id="insert" type="submit">Insert/Update</button>
+        </form>
+        <h3 id="insert-result"></h3>
+    </div>
+    
+    <div class="main" id="read"> 
+        <form id="read">
+            <input id="read-table" type="text" placeholder="Enter Table Name">
+            <input id="read-hospitalID" type="text" placeholder="Enter Hospital ID">
+            <input id="read-department" type="text" placeholder="Enter Department">
+            <input id="read-room" type="text" placeholder="Enter Room ID">
+            <button id="read" type="submit">Request Read</button>
+        </form>
+        <h3 id="read-result"></h3>
+    </div>
+
+    <div class="main" id="delete"> 
+        <form id="delete">
+            <input id="delete-table" type="text" placeholder="Enter Table Name">
+            <input id="delete-hospitalID" type="text" placeholder="Enter Hospital ID">
+            <input id="delete-department" type="text" placeholder="Enter Department">
+            <input id="delete-room" type="text" placeholder="Enter Room ID">
+            <button id="delete" type="submit">Delete</button>
+        </form>
+        <h3 id="delete-result"></h3>
+    </div>
+
+    <script type="text/javascript" src="app.js"></script>
+</body>
+</html>
