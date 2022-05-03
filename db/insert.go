@@ -14,7 +14,7 @@ func (h *Handler) HandleDBInsert(c *fiber.Ctx) error {
 	var (
 		reqBody messages.WriteRequest
 	)
-	filename := fmt.Sprintf("%d/table.json", h.Node.Id)
+	filename := fmt.Sprintf("data/%d.json", h.Node.Id)
 	localData, err := ReadJSON(filename)
 	if err := c.BodyParser(&reqBody); err != nil {
 		return err
