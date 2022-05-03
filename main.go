@@ -91,6 +91,15 @@ func informRevive(h *read_write.Handler) {
 	fmt.Println("All nodes informed.")
 }
 
+func performSanityCheck(config c.Configurations) {
+	if config.ReplicationFactor > len(config.Ring.Nodes) {
+		fmt.Println("ERROR: Replication factor can not be more than the number of nodes in the ring.")
+		os.Exit(1)
+	} else {
+		fmt.Println("Sanity Check: CLEAR.")
+	}
+}
+
 func main() {
 	var (
 		config c.Configurations
@@ -113,6 +122,9 @@ func main() {
 		fmt.Println("Please enter node ID")
 		return
 	}
+
+	performSanityCheck(config)
+
 	nodeID, err := strconv.Atoi(args[1])
 	//initialize a Node
 	node := &utils.Node{
