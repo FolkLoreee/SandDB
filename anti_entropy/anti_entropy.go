@@ -1127,7 +1127,7 @@ func ExistingDataContains(existingData []RepairGetRequest, row RepairGetRequest)
 	return false
 }
 
-// TODO: Integration - use the functions from the read_write module instead and delete from this file (might also need to rethink the actual implementation of this since the hashes in r.NodeHashes might not always be strictly decreasing)
+// TODO: Integration - use the functions from the read_write module instead and delete from this file (might also need to rethink the actual implementation of this since the hashes in r.NodeHashes might not always be strictly increasing)
 func (r *Ring) Search(hash int64) int {
 	index := 0
 	for idx, nodeHash := range r.NodeHashes {
