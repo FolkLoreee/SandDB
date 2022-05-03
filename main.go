@@ -155,7 +155,6 @@ func main() {
 	internalGroup.Post("/repair/trigger_delete", antiEntropyHandler.HandleRepairDeleteRequest)
 	internalGroup.Post("/repair/missing_subrepair", antiEntropyHandler.HandleMissingSubrepairRequest)
 	err = app.Listen(node.Port)
-	//TODO: split between read and write request
 	//app.Post("/request", requestHandler.HandleRequest)
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
 	app.Post("/insert", requestHandler.HandleClientWriteRequest)

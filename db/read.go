@@ -18,7 +18,7 @@ func (h *Handler) HandleDBRead(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	filename := fmt.Sprintf("%d/table.json", h.Node.Id)
+	filename := fmt.Sprintf("data/%d.json", h.Node.Id)
 	localData, err := ReadJSON(filename)
 
 	table := GetTable(reqBody.TableName, localData)

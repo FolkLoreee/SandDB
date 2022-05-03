@@ -2,19 +2,17 @@ package anti_entropy
 
 import (
 	"bytes"
-	"crypto/md5"
 	"encoding/json"
+	"github.com/gofiber/fiber/v2"
+	"github.com/spaolacci/murmur3"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"sanddb/db"
+	"sanddb/utils"
 	"sort"
 	"strconv"
 	"time"
-	"unsafe"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/spaolacci/murmur3"
 )
 
 // This anti-entropy module should be delegated to a daemon that runs in the background at each node.
@@ -80,7 +78,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 					}
 					dataHash := murmur3.New64()
 					dataHash.Write([]byte(cells))
-					hash := ByteArrayToInt(dataHash.Sum(nil))
+					hash := utils.ByteArrayToInt(dataHash.Sum(nil))
 					dataFromReplicas[0] = RepairGetResponse{
 						Data:   row,
 						Hash:   hash,
@@ -131,7 +129,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 						}
 						secondaryDataHash := murmur3.New64()
 						secondaryDataHash.Write([]byte(secondaryData))
-						secondaryHash := ByteArrayToInt(secondaryDataHash.Sum(nil))
+						secondaryHash := utils.ByteArrayToInt(secondaryDataHash.Sum(nil))
 
 						if responseData.Hash != secondaryHash && responseData.Hash != -1 {
 							log.Println("Hash mismatch due to potential Byzantine error! Hashes:", responseData.Hash, secondaryHash)
@@ -210,7 +208,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 						TableName:          table.TableName,
 						PartitionKeyNames:  table.PartitionKeyNames,
 						ClusteringKeyNames: table.ClusteringKeyNames,
-						Partitions: []db.Partition{
+						Partitions: []*db.Partition{
 							{
 								Metadata: partition.Metadata,
 								Rows: []*db.Row{
@@ -350,7 +348,7 @@ func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 		log.Println("Error reading file:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
-	var data LocalData
+	var data db.LocalData
 	err = json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Println("Error unmarshalling data:", err)
@@ -374,7 +372,7 @@ func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 					}
 					dataHash := murmur3.New64()
 					dataHash.Write([]byte(cells))
-					hash := ByteArrayToInt(dataHash.Sum(nil))
+					hash := utils.ByteArrayToInt(dataHash.Sum(nil))
 					dataFromReplicas[0] = RepairGetResponse{
 						Data:   row,
 						Hash:   hash,
@@ -420,7 +418,7 @@ func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 						}
 						secondaryDataHash := murmur3.New64()
 						secondaryDataHash.Write([]byte(secondaryData))
-						secondaryHash := ByteArrayToInt(secondaryDataHash.Sum(nil))
+						secondaryHash := utils.ByteArrayToInt(secondaryDataHash.Sum(nil))
 
 						if responseData.Hash != secondaryHash && responseData.Hash != -1 {
 							log.Println("Hash mismatch due to potential Byzantine error! Hashes:", responseData.Hash, secondaryHash)
@@ -492,10 +490,10 @@ func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 						TableName:          table.TableName,
 						PartitionKeyNames:  table.PartitionKeyNames,
 						ClusteringKeyNames: table.ClusteringKeyNames,
-						Partitions: []Partition{
+						Partitions: []*db.Partition{
 							{
 								Metadata: partition.Metadata,
-								Rows: []Row{
+								Rows: []*db.Row{
 									dataFromReplicas[latestDataIndex].Data,
 								},
 							},
@@ -609,7 +607,7 @@ func (h *AntiEntropyHandler) HandleRepairGetRequest(c *fiber.Ctx) error {
 		log.Println("Error reading file:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
-	var data LocalData
+	var data db.LocalData
 	err = json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Println("Error unmarshalling data:", err)
@@ -617,7 +615,7 @@ func (h *AntiEntropyHandler) HandleRepairGetRequest(c *fiber.Ctx) error {
 	}
 
 	responseData := RepairGetResponse{
-		Data:   Row{},
+		Data:   &db.Row{},
 		Hash:   -1,
 		NodeID: nodeID,
 	}
@@ -639,7 +637,7 @@ func (h *AntiEntropyHandler) HandleRepairGetRequest(c *fiber.Ctx) error {
 							hash := dataHash.Sum(nil)
 							// Prepare response
 							responseData.Data = row
-							responseData.Hash = ByteArrayToInt(hash[:])
+							responseData.Hash = utils.ByteArrayToInt(hash[:])
 							responseData.NodeID = nodeID
 						}
 					}
@@ -676,7 +674,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 		log.Println("Error reading file:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
-	var data LocalData
+	var data db.LocalData
 	err = json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Println("Error unmarshalling data:", err)
@@ -687,7 +685,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 
 	// Edge case where there is no data in local file yet
 	if len(data) == 0 {
-		newTable := Table{
+		newTable := &db.Table{
 			TableName:          requestData.TableName,
 			PartitionKeyNames:  requestData.PartitionKeyNames,
 			ClusteringKeyNames: requestData.ClusteringKeyNames,
@@ -757,7 +755,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 				if !dataIsUpdated {
 					dataIsUpdated = true
 				}
-				newTable := Table{
+				newTable := &db.Table{
 					TableName:          requestData.TableName,
 					PartitionKeyNames:  requestData.PartitionKeyNames,
 					ClusteringKeyNames: requestData.ClusteringKeyNames,
@@ -840,7 +838,7 @@ func (h *AntiEntropyHandler) HandleRepairDeleteRequest(c *fiber.Ctx) error {
 		log.Println("Error reading file:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
-	var data LocalData
+	var data db.LocalData
 	err = json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Println("Error unmarshalling data:", err)
@@ -912,7 +910,7 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 		log.Println("Error reading file:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
-	var data LocalData
+	var data db.LocalData
 	err = json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Println("Error unmarshalling data:", err)
@@ -945,9 +943,9 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 						}
 						dataHash := murmur3.New64()
 						dataHash.Write([]byte(cells))
-						hash := ByteArrayToInt(dataHash.Sum(nil))
+						hash := utils.ByteArrayToInt(dataHash.Sum(nil))
 						dataFromReplicas[0] = RepairGetResponse{
-							Data:   Row{},
+							Data:   &db.Row{},
 							Hash:   -1,
 							NodeID: index,
 						}
@@ -992,7 +990,7 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 								}
 								secondaryDataHash := murmur3.New64()
 								secondaryDataHash.Write([]byte(secondaryData))
-								secondaryHash := ByteArrayToInt(secondaryDataHash.Sum(nil))
+								secondaryHash := utils.ByteArrayToInt(secondaryDataHash.Sum(nil))
 
 								if responseData.Hash != secondaryHash && responseData.Hash != -1 {
 									log.Println("Hash mismatch due to potential Byzantine error! Hashes:", responseData.Hash, secondaryHash)
@@ -1065,10 +1063,10 @@ func (h *AntiEntropyHandler) HandleMissingSubrepairRequest(c *fiber.Ctx) error {
 							TableName:          table.TableName,
 							PartitionKeyNames:  table.PartitionKeyNames,
 							ClusteringKeyNames: table.ClusteringKeyNames,
-							Partitions: []Partition{
+							Partitions: []*db.Partition{
 								{
 									Metadata: partition.Metadata,
-									Rows: []Row{
+									Rows: []*db.Row{
 										dataFromReplicas[latestDataIndex].Data,
 									},
 								},
@@ -1126,32 +1124,4 @@ func ExistingDataContains(existingData []RepairGetRequest, row RepairGetRequest)
 		}
 	}
 	return false
-}
-
-// TODO: Integration - use the functions from the read_write module instead and delete from this file (might also need to rethink the actual implementation of this since the hashes in r.NodeHashes might not always be strictly increasing)
-func (r *Ring) Search(hash int64) int {
-	index := 0
-	for idx, nodeHash := range r.NodeHashes {
-		if hash <= nodeHash {
-			index = idx
-			break
-		}
-	}
-
-	return index
-}
-
-func ByteArrayToInt(arr []byte) int64 {
-	val := int64(0)
-	size := len(arr)
-	for i := 0; i < size; i++ {
-		*(*uint8)(unsafe.Pointer(uintptr(unsafe.Pointer(&val)) + uintptr(i))) = arr[i]
-	}
-	return val
-}
-
-func GetHash(id string) int64 {
-	data := []byte(id)
-	hash := md5.Sum(data)
-	return ByteArrayToInt(hash[:])
 }

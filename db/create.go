@@ -12,7 +12,7 @@ func (h *Handler) HandleCreateTable(c *fiber.Ctx) error {
 	var (
 		reqBody messages.CreateRequest
 	)
-	filename := fmt.Sprintf("%d/table.json", h.Node.Id)
+	filename := fmt.Sprintf("data/%d.json", h.Node.Id)
 	localData, err := ReadJSON(filename)
 	err = c.BodyParser(&reqBody)
 	if err != nil {

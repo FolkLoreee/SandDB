@@ -11,30 +11,24 @@ function handleCreate(e) {
 
     // get input from user
     let table = document.querySelector("#create-table").value;
-    let hospitalId = document.querySelector("#create-hospitalID").value;
-    let department = document.querySelector("#create-department").value;
-    let room = document.querySelector("#create-room").value;
+    let partition_key_names = document.querySelector("#create-partitionkeys").value;
+    let clustering_key_names = document.querySelector("#create-clusteringkeys").value;
     if (table == "") {
         alert("Please enter a valid table name");
         return;
-    } 
-    else if (hospitalId == "") {
-        alert("Please enter a valid hospital ID");
+    }
+    else if (partition_key_names == "") {
+        alert("Please enter valid Partiton Keys");
         return;
     }
-    else if (department == "") {
-        alert("Please enter a valid department");
+    else if (clustering_key_names == "") {
+        alert("Please enter valid Clustering Keys");
         return;
+    } else {
+        partition_key_names = partition_key_names.split(",")
+        clustering_key_names = clustering_key_names.split(",")
     }
-    else if (room == "") {
-        alert("Please enter a valid room ID");
-        return;
-    }
-    else {
-        department = department.toUpperCase();
-        room = room.toUpperCase();
-    }
-    
+
     // result = table+hospitalId+department+room
     // const res = document.querySelector("#create-result");
     // res.innerHTML = result;
@@ -63,9 +57,11 @@ function handleCreate(e) {
 
     let data = `{
         "table_name": "${table}",
-        "partition_key_names": ["HOSPITAL_ID_${hospitalId}","${department}_DEPT"],
-        "clustering_key_names": ["${room}"]
+        "partition_key_names": [${partition_key_names}],
+        "clustering_key_names": [${clustering_key_names}]
     }`;
+    console.log(data);
+
     xhr.send(data);
 }
 
@@ -81,7 +77,7 @@ function handleRead(e) {
     if (table == "") {
         alert("Please enter a valid table name");
         return;
-    } 
+    }
     else if (hospitalId == "") {
         alert("Please enter a valid hospital ID");
         return;
@@ -98,7 +94,7 @@ function handleRead(e) {
         department = department.toUpperCase();
         room = room.toUpperCase();
     }
-    
+
     // const res = document.querySelector("#general-result");
     // res.innerHTML = result;
 
@@ -126,10 +122,10 @@ function handleRead(e) {
 
     let data = `{
         "table_name": "${table}",
-        "partition_keys": ["HOSPITAL_ID_${hospitalId}","${department}_DEPT"],
+        "partition_keys": ["${hospitalId}","${department}"],
         "clustering_keys": ["${room}"]
     }`;
-    console.log(data);
+
     xhr.send(data);
 }
 
@@ -145,7 +141,7 @@ function handleDelete(e) {
     if (table == "") {
         alert("Please enter a valid table name");
         return;
-    } 
+    }
     else if (hospitalId == "") {
         alert("Please enter a valid hospital ID");
         return;
@@ -162,7 +158,7 @@ function handleDelete(e) {
         department = department.toUpperCase();
         room = room.toUpperCase();
     }
-    
+
     // const res = document.querySelector("#general-result");
     // res.innerHTML = result;
 
@@ -189,10 +185,11 @@ function handleDelete(e) {
     };
 
     let data = `{
-        table_name: ${table},
-        partition_key_names: ["HOSPITAL_ID_${hospitalId}","${department}_DEPT"],
-        clustering_key_names: ["${room}"],
+        "table_name": "${table}",
+        "partition_key_names": ["${hospitalId}","${department}"],
+        "clustering_keys_names": ["${room}"]
     }`;
+
     xhr.send(data);
 }
 
@@ -210,7 +207,7 @@ function handleInsert(e) {
     if (table == "") {
         alert("Please enter a valid table name");
         return;
-    } 
+    }
     else if (hospitalId == "") {
         alert("Please enter a valid hospital ID");
         return;
@@ -225,7 +222,7 @@ function handleInsert(e) {
     }
     else if (resourceName == "") {
         alert("Please enter a valid resource name")
-        return 
+        return
     }
     else if (resourceValue == "") {
         alert("Please enter a valid resource amount")
@@ -234,8 +231,10 @@ function handleInsert(e) {
     else {
         department = department.toUpperCase();
         room = room.toUpperCase();
+        resourceName = resourceName.split(",")
+        resourceValue = resourceValue.split(",")
     }
-    
+
     // const res = document.querySelector("#insert-result");
     // res.innerHTML = result;
 
@@ -263,17 +262,17 @@ function handleInsert(e) {
 
     let data = `{
         "table_name": "${table}",
-        "partition_keys": ["HOSPITAL_ID_${hospitalId}","${department}_DEPT"],
+        "partition_keys": ["${hospitalId}","${department}"],
         "clustering_keys": ["${room}"],
-        "cell_names": ["${resourceName}"],
-        "cell_values": ["${resourceValue}"]
+        "cell_names": [${resourceName}],
+        "cell_values": [${resourceValue}]
     }`;
-    console.log(data);
+
     xhr.send(data);
 }
 
 function getInputValues() {
-    
+
 
     return table, hospitalId, department, room;
 }
