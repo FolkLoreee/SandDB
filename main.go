@@ -9,14 +9,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/spf13/viper"
 	"os/signal"
 	"sanddb/db"
 	"sanddb/read_write"
 	"sanddb/utils"
 	"syscall"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/spf13/viper"
 )
 
 func hello(c *fiber.Ctx) error {
@@ -154,7 +155,7 @@ func main() {
 	internalGroup.Post("/repair/write_data", antiEntropyHandler.HandleRepairWriteRequest)
 	internalGroup.Post("/repair/trigger_delete", antiEntropyHandler.HandleRepairDeleteRequest)
 	internalGroup.Post("/repair/missing_subrepair", antiEntropyHandler.HandleMissingSubrepairRequest)
-	err = app.Listen(node.Port)
+	// err = app.Listen(node.Port)
 	//app.Post("/request", requestHandler.HandleRequest)
 	app.Post("/create", requestHandler.HandleClientCreateRequest)
 	app.Post("/insert", requestHandler.HandleClientWriteRequest)
