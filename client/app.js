@@ -37,22 +37,19 @@ function handleCreate(e) {
             partition_keys = partition_keys + `"${partition_key_names[i]}",`
             }
         }
-        // partition_keys = partition_keys + "]"
         var clustering_keys = ""
-        for (var i = 0; i<clustering_key_names.length; i++) {
-            // if (i == partition_key_names.length-1) {
-            //     clustering_keys = clustering_keys + `"${clustering_key_names[i]}"`    
-            // } else {
-            // clustering_keys = clustering_keys + `"${clustering_key_names[i]}",`
-            // }
+        if (clustering_key_names.length === 1) {
             clustering_keys = clustering_keys + `"${clustering_key_names[i]}"`
+        } else {
+            for (var i = 0; i<clustering_key_names.length; i++) {
+                if (i == partition_key_names.length-1) {
+                    clustering_keys = clustering_keys + `"${clustering_key_names[i]}"`    
+                } else {
+                clustering_keys = clustering_keys + `"${clustering_key_names[i]}",`
+                }
+            }
         }
-        // clustering_keys = clustering_keys + "]"
     }
-    
-    // result = table+hospitalId+department+room
-    // const res = document.querySelector("#create-result");
-    // res.innerHTML = result;
 
     // send input to endpoints
     const ports = ["8000", "8001", "8002", "8003"];
@@ -66,14 +63,12 @@ function handleCreate(e) {
     xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status == 200) {
-            result = xhr.statusText;
+        if (xhr.readyState === 4 && xhr.status === 201) {
+            result = xhr.responseText;
             const res = document.querySelector("#create-result");
             res.innerHTML = result;
-        } else {
-            alert("server issue");
             return;
-        }
+        } 
     };
 
     let data = `{
@@ -92,32 +87,47 @@ function handleRead(e) {
 
     // get input from user
     let table = document.querySelector("#read-table").value;
-    let hospitalId = document.querySelector("#read-hospitalID").value;
-    let department = document.querySelector("#read-department").value;
-    let room = document.querySelector("#read-room").value;
+    let partition_keys = document.querySelector("#read-partitionkeys").value;
+    let clustering_keys = document.querySelector("#read-clusteringkeys").value;
+    // let room = document.querySelector("#read-room").value;
     if (table == "") {
         alert("Please enter a valid table name");
         return;
     } 
-    else if (hospitalId == "") {
+    else if (partition_keys == "") {
         alert("Please enter a valid hospital ID");
         return;
     }
-    else if (department == "") {
+    else if (clustering_keys == "") {
         alert("Please enter a valid department");
         return;
     }
-    else if (room == "") {
-        alert("Please enter a valid room ID");
-        return;
-    }
     else {
-        department = department.toUpperCase();
-        room = room.toUpperCase();
+        partition_keys = partition_keys.split(",")
+        clustering_keys = clustering_keys.split(",")
+        var partitionKeys = ""
+        for (var i = 0; i<partition_keys.length; i++) {
+            if (i == partition_keys.length-1) {
+                partitionKeys = partitionKeys + `"${partition_keys[i]}"`    
+            } else {
+            partitionKeys = partitionKeys + `"${partition_keys[i]}",`
+            }
+        }
+
+        var clusteringKeys = ""
+        if (clusteringKeys.length === 1) {
+            clusteringKeys = clusteringKeys + `"${clustering_keys[i]}"`
+        } else {
+            for (var i = 0; i<clustering_keys.length; i++) {
+                if (i == partition_keys.length-1) {
+                    clustering_keys = clustering_keys + `"${clustering_key_names[i]}"`    
+                } else {
+                clustering_keys = clustering_keys + `"${clustering_key_names[i]}",`
+                }
+            }
+        }
     }
     
-    // const res = document.querySelector("#general-result");
-    // res.innerHTML = result;
 
     // send input to endpoints
     const ports = ["8000", "8001", "8002", "8003"];
@@ -132,20 +142,34 @@ function handleRead(e) {
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status == 200) {
-            result = xhr.responseText;
+            console.log("read successful")
+            var response = JSON.parse(xhr.responseText)
+            console.log(response["cells"].length)
+            result = ""
+            if (response["cells"].length === 1) {
+                result = result + `${response["cells"][0]["name"]}: ${response["cells"][0]["value"]}`
+            } else {
+                for (var i = 0; i<response.length; i++) {
+                    console.log(response["cells"][i])
+                    result = result + `${response["cells"][i]["name"]}: ${response["cells"][i]["value"]} \n`
+                }
+            }
+            console.log(result)
             const res = document.querySelector("#read-result");
             res.innerHTML = result;
         } else {
-            alert("server issue");
-            return;
+            result = "error reading table";
+            const res = document.querySelector("#read-result");
+            res.innerHTML = result;
         }
     };
 
     let data = `{
         "table_name": "${table}",
-        "partition_keys": ["${hospitalId}","${department}"],
-        "clustering_keys": ["${room}"]
+        "partition_keys": [${partitionKeys}],
+        "clustering_keys": [${clusteringKeys}]
     }`;
+    console.log(data)
 
     xhr.send(data);
 }
@@ -175,13 +199,6 @@ function handleDelete(e) {
         alert("Please enter a valid room ID");
         return;
     }
-    else {
-        department = department.toUpperCase();
-        room = room.toUpperCase();
-    }
-    
-    // const res = document.querySelector("#general-result");
-    // res.innerHTML = result;
 
     // send input to endpoints
     const ports = ["8000", "8001", "8002", "8003"];
@@ -250,8 +267,6 @@ function handleInsert(e) {
         return
     }
     else {
-        department = department.toUpperCase();
-        room = room.toUpperCase();
         resourceName = resourceName.split(",")
         resourceValue = resourceValue.split(",")
         var resource_names = ""
@@ -271,9 +286,6 @@ function handleInsert(e) {
             }
         }
     }
-    
-    // const res = document.querySelector("#insert-result");
-    // res.innerHTML = result;
 
     // send input to endpoints
     const ports = ["8000", "8001", "8002", "8003"];
@@ -288,12 +300,15 @@ function handleInsert(e) {
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status == 200) {
-            result = xhr.responseText;
+            result = "data successfully written";
             const res = document.querySelector("#insert-result");
             res.innerHTML = result;
-        } else {
-            alert("server issue");
-            return;
+        } 
+        else {
+            console.log(xhr.status)
+            result = "error writing data";
+            const res = document.querySelector("#insert-result");
+            res.innerHTML = result;
         }
     };
 
@@ -320,7 +335,6 @@ function handleRepair(e) {
             const res = document.querySelector("#repair-result");
             res.innerHTML = xhr.statusText;
         } else {
-            alert("server issue");
             const res = document.querySelector("#repair-result");
             res.innerHTML = xhr.statusText;
             return;
