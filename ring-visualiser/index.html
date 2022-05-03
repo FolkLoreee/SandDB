@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Simple Pie</title>
+
+    <link href="styles.css" rel="stylesheet" />
+
+    <style>
+        #chart {
+            max-width: 480px;
+            margin: 35px auto;
+            padding: 0;
+        }
+
+        .actions {
+            top: -10px;
+            position: relative;
+            z-index: 10;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        button {
+            color: #fff;
+            background: #20b2aa;
+            padding: 5px 10px;
+            margin: 2px;
+            font-weight: bold;
+            font-size: 13px;
+            border-radius: 5px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .actions {
+                margin-top: 0;
+                left: 0
+            }
+        }
+    </style>
+
+    <script>
+        window.Promise ||
+            document.write(
+                '<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"><\/script>'
+            )
+        window.Promise ||
+            document.write(
+                '<script src="https://cdn.jsdelivr.net/npm/eligrey-classlist-js-polyfill@1.2.20171210/classList.min.js"><\/script>'
+            )
+        window.Promise ||
+            document.write(
+                '<script src="https://cdn.jsdelivr.net/npm/findindex_polyfill_mdn"><\/script>'
+            )
+    </script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+
+    <script>
+        // Replace Math.random() with a pseudo-random number generator to get reproducible results in e2e tests
+        // Based on https://gist.github.com/blixt/f17b47c62508be59987b
+        var _seed = 42;
+        Math.random = function () {
+            _seed = _seed * 16807 % 2147483647;
+            return (_seed - 1) / 2147483646;
+        };
+    </script>
+
+
+</head>
+
+<body>
+    <div>
+        <div class="chart-wrap">
+            <div id="chart"></div>
+        </div>
+
+        <div class="actions">
+            <button id="add">
+                + ADD
+            </button>
+
+            <button id="remove">
+                - REMOVE
+            </button>
+
+            <button id="reset">
+                RESET
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        let ports = ["8000", "8001", "8002", "8003"]
+
+        var options = {
+            series: [1, 1, 1, 1],
+            labels: ["8000", "8001", "8002", "8003"],
+            chart: {
+                width: 380,
+                type: 'donut',
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        show: false
+                    }
+                }
+            }],
+            legend: {
+                show: false,
+                // position: 'right',
+                // offsetY: 0,
+                // height: 230,
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+
+        function appendData() {
+            // send http post request
+            // let xhr = new XMLHttpRequest();
+            // const ports = ["8000", "8001", "8002", "8003"]
+            // const port = ports[Math.floor(Math.random() * 10) - 6]
+            // let url = "http://127.0.0.1:" + port
+            // console.log(url)
+            // xhr.open("POST", url);
+            // xhr.setRequestHeader("Content-Type", "application/json");
+
+            // xhr.onreadystatechange = function () {
+            // if (xhr.readyState === 4) {
+            //     console.log(xhr.status);
+            //     console.log(xhr.responseText);
+            // }};
+
+            // let data = `{
+            //     "type": 6,
+            //     "version": 0,
+            //     "content": "none",
+            //     "node_id": 0
+            // }`;
+
+            // xhr.send(data);
+
+            // add to array
+            var arr = chart.w.globals.series.slice()
+            arr.push(1)
+            return arr;
+        }
+
+        function removeData() {
+            // send http post request
+            let xhr = new XMLHttpRequest();
+            
+            console.log(options.labels)
+            port = options.labels[options.labels.length - 1]
+            let url = "http://127.0.0.1:" + port + "/killNode"
+            console.log(url)
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                console.log(xhr.status);
+                console.log(xhr.responseText);
+            }};
+
+            let data = `{
+                "type": 2,  
+                "content": "0"
+            }`;
+
+            xhr.send(data);
+            options.labels.pop()
+            options.series.pop()
+            console.log(options.labels, options.series)
+
+            return options;
+        }
+
+        function reset() {
+            return options.series
+        }
+
+        document.querySelector("#add").addEventListener("click", function () {
+            chart.updateSeries(appendData())
+        })
+
+        document.querySelector("#remove").addEventListener("click", function () {
+            chart.updateOptions(removeData())
+        })
+
+        document.querySelector("#reset").addEventListener("click", function () {
+            chart.updateSeries(reset())
+        })
+
+    </script>
+
+</body>
+</html>

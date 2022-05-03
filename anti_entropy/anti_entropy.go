@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"sanddb/db"
 	"sort"
 	"strconv"
 	"time"
@@ -43,7 +44,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 		log.Println("Error reading file:", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to perform the anti-entropy repair. Error: " + err.Error())
 	}
-	var data LocalData
+	var data db.LocalData
 	err = json.Unmarshal([]byte(file), &data)
 	if err != nil {
 		log.Println("Error unmarshalling data:", err)
@@ -209,10 +210,10 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 						TableName:          table.TableName,
 						PartitionKeyNames:  table.PartitionKeyNames,
 						ClusteringKeyNames: table.ClusteringKeyNames,
-						Partitions: []Partition{
+						Partitions: []db.Partition{
 							{
 								Metadata: partition.Metadata,
-								Rows: []Row{
+								Rows: []*db.Row{
 									dataFromReplicas[latestDataIndex].Data,
 								},
 							},
