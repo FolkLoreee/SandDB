@@ -60,7 +60,8 @@ func (r *Ring) Replicate(partitionKey string) []*Node {
 // }
 
 func RemoveNodeHash(nodeHashes []int64, hash int64) []int64 {
-	newNodeHashes := make([]int64, len(nodeHashes))
+	fmt.Println("Removing node hash...")
+	newNodeHashes := make([]int64, 0)
 	for _, nHash := range nodeHashes {
 		if nHash == hash {
 			continue
@@ -71,17 +72,23 @@ func RemoveNodeHash(nodeHashes []int64, hash int64) []int64 {
 }
 
 func AddNodeHash(nodeHashes []int64, hash int64) []int64 {
-	newNodeHashes := make([]int64, len(nodeHashes))
-	sortedHashes := Sort(nodeHashes)
-	for _, nHash := range sortedHashes {
-		// sort nodehashes
-		// if nodehash
-		if hash > nHash {
-			newNodeHashes = append(newNodeHashes, hash)
-		} else {
-			newNodeHashes = append(newNodeHashes, nHash)
-		}
+	fmt.Println("Adding node hash...")
+	// newNodeHashes := make([]int64, 0)
+	inNodeHash := IsInNodeHash(nodeHashes, hash)
+	if !inNodeHash {
+		nodeHashes = append(nodeHashes, hash)
 	}
+	// nodeHashes = append(nodeHashes, hash)
+	sortedHashes := Sort(nodeHashes)
+	// for _, nHash := range sortedHashes {
+	// 	// sort nodehashes
+	// 	// if nodehash
+	// 	if hash > nHash {
+	// 		newNodeHashes = append(newNodeHashes, hash)
+	// 	} else {
+	// 		newNodeHashes = append(newNodeHashes, nHash)
+	// 	}
+	// }
 
-	return newNodeHashes
+	return sortedHashes
 }

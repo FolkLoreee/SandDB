@@ -53,3 +53,12 @@ func Int64ToInt(int64Values []int64) []int {
 	}
 	return int64AsIntValues
 }
+
+func IsInNodeHash(nodeHashes []int64, hash int64) bool {
+	for _, nodeHash := range nodeHashes {
+		if nodeHash == hash {
+			return true
+		}
+	}
+	return false
+}

@@ -75,6 +75,8 @@ func (h *Handler) HandleKillNode(c *fiber.Ctx) error {
 	_ = c.Send(resp)
 	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
 	fmt.Printf("Content received: %s.\n", requestMsg.Content)
+	fmt.Print("NODE HASHES: ")
+	fmt.Println(h.Ring.NodeHashes)
 	return nil
 }
 
@@ -167,6 +169,7 @@ func (h *Handler) HandleReviveNode(c *fiber.Ctx) error {
 	_ = c.Send(resp)
 	fmt.Printf("Received request from node %d.\n", requestMsg.SourceID)
 	fmt.Printf("Content received: %s.\n", requestMsg.Content)
+	fmt.Print("NODE HASHES: ")
 	fmt.Println(h.Ring.NodeHashes)
 	return nil
 }
