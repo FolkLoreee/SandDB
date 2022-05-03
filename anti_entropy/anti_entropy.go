@@ -324,7 +324,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 	}
 
 	// Request a primary range repair (not full repair) to all of the following nodes
-	for i := 1; i < h.Ring.ReplicationFactor; i++ {
+	for i := 1; i < len(h.Ring.NodeHashes); i++ {
 		replicaID := (nodeID + i) % len(h.Ring.NodeHashes)
 		primaryRangeRepairResponse, err := netClient.Post(h.Ring.Nodes[replicaID].IPAddress+h.Ring.Nodes[replicaID].Port+"/repair", "application/json", bytes.NewBuffer([]byte{}))
 		if err != nil {
