@@ -682,6 +682,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 	}
 
 	dataIsUpdated := false
+	dataIsFound := false
 
 	// Edge case where there is no data in local file yet
 	if len(data) == 0 {
@@ -703,6 +704,7 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 					if partition.Metadata.PartitionKey == requestData.Partitions[0].Metadata.PartitionKey {
 						for k, row := range partition.Rows {
 							if row.ClusteringKeyHash == requestData.Partitions[0].Rows[0].ClusteringKeyHash {
+								dataIsFound = true
 								incomingData := requestData.Partitions[0].Rows[0]
 								// Additional check to only execute writing if the incoming data is actually newer than the existing data (which should always be the case if a write_data request is performed in the first place, but just in case)
 								if row.UpdatedAt.UnixNano() < incomingData.UpdatedAt.UnixNano() {
@@ -732,37 +734,36 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 										break out
 									}
 								}
-							} else {
-								// Add missing data
-								if !dataIsUpdated {
-									dataIsUpdated = true
-								}
-								data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
-								break out
 							}
+						}
+						// Add missing data
+						if !dataIsUpdated && !dataIsFound {
+							dataIsUpdated = true
+							data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
+							break out
 						}
 					} else {
 						// Add missing data
-						if !dataIsUpdated {
+						if !dataIsUpdated && !dataIsFound {
 							dataIsUpdated = true
+							data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
+							break out
 						}
-						data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
-						break out
 					}
 				}
 			} else {
 				// Add missing data
-				if !dataIsUpdated {
+				if !dataIsUpdated && !dataIsFound {
 					dataIsUpdated = true
+					newTable := Table{
+						TableName:          requestData.TableName,
+						PartitionKeyNames:  requestData.PartitionKeyNames,
+						ClusteringKeyNames: requestData.ClusteringKeyNames,
+						Partitions:         requestData.Partitions,
+					}
+					data = append(data, newTable)
+					break out
 				}
-				newTable := &db.Table{
-					TableName:          requestData.TableName,
-					PartitionKeyNames:  requestData.PartitionKeyNames,
-					ClusteringKeyNames: requestData.ClusteringKeyNames,
-					Partitions:         requestData.Partitions,
-				}
-				data = append(data, newTable)
-				break out
 			}
 		}
 	}
