@@ -1,0 +1,265 @@
+[
+  {
+    "table_name": "Hospital Information",
+    "partition_key_names": ["Hospital ID", "Hospital Department"],
+    "clustering_key_names": ["Room ID"],
+    "partitions": [
+      {
+        "partition_metadata": {
+          "partition_key": 0,
+          "partition_key_values": ["1", "General"]
+        },
+        "rows": [
+          {
+            "created_at": 1464175411324447,
+            "updated_at": 1464175411324450,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["BC-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "77777"
+              },
+              {
+                "name": "Oxygen Tank",
+                "value": "17"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "partition_metadata": {
+          "partition_key": 1,
+          "partition_key_values": ["1", "Specialized"]
+        },
+        "rows": [
+          {
+            "created_at": 1464175411324447,
+            "updated_at": 1464175411324444,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["BC-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "20"
+              },
+              {
+                "name": "Oxygen Tank",
+                "value": "17"
+              }
+            ]
+          },
+          {
+            "created_at": 1464175501324447,
+            "updated_at": 1464175501324455,
+            "deleted_at": -1,
+            "clustering_key_hash": 1,
+            "clustering_key_values": ["BC-2"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "99999"
+              },
+              {
+                "name": "Surgical Table",
+                "value": "2"
+              },
+              {
+                "name": "X-Ray Machine",
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "partition_metadata": {
+          "partition_key": -4266524885998034046,
+          "partition_key_values": ["2", "General"]
+        },
+        "rows": [
+          {
+            "created_at": 1474175501324447,
+            "updated_at": 1474175501324447,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["DD-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "100"
+              },
+              {
+                "name": "Defibrillator",
+                "value": "11"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "partition_metadata": {
+          "partition_key": 0,
+          "partition_key_values": ["1", "General"]
+        },
+        "rows": [
+          {
+            "created_at": 1464175411324447,
+            "updated_at": 1464175411324450,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["BC-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "77777"
+              },
+              {
+                "name": "Oxygen Tank",
+                "value": "17"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "partition_metadata": {
+          "partition_key": 0,
+          "partition_key_values": ["1", "General"]
+        },
+        "rows": [
+          {
+            "created_at": 1464175411324447,
+            "updated_at": 1464175411324450,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["BC-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "77777"
+              },
+              {
+                "name": "Oxygen Tank",
+                "value": "17"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "table_name": "Hospital Information",
+    "partition_key_names": ["Hospital ID", "Hospital Department"],
+    "clustering_key_names": ["Room ID"],
+    "partitions": [
+      {
+        "partition_metadata": {
+          "partition_key": 0,
+          "partition_key_values": ["1", "General"]
+        },
+        "rows": [
+          {
+            "created_at": 1464175411324447,
+            "updated_at": 1464175411324450,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["BC-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "77777"
+              },
+              {
+                "name": "Oxygen Tank",
+                "value": "17"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "table_name": "Hospitals by City",
+    "partition_key_names": ["Hospital ID", "Hospital Department"],
+    "clustering_key_names": ["Room ID"],
+    "partitions": [
+      {
+        "partition_metadata": {
+          "partition_key": 1,
+          "partition_key_values": ["1", "Specialized"]
+        },
+        "rows": [
+          {
+            "created_at": 1464175411324447,
+            "updated_at": 1464175411324447,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["BC-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "15"
+              },
+              {
+                "name": "Oxygen Tank",
+                "value": "17"
+              }
+            ]
+          },
+          {
+            "created_at": 1464175501324447,
+            "updated_at": 1464175501324447,
+            "deleted_at": -1,
+            "clustering_key_hash": 1,
+            "clustering_key_values": ["BC-2"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "5"
+              },
+              {
+                "name": "Surgical Table",
+                "value": "2"
+              },
+              {
+                "name": "X-Ray Machine",
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "partition_metadata": {
+          "partition_key": -4266524885998034046,
+          "partition_key_values": ["2", "General"]
+        },
+        "rows": [
+          {
+            "created_at": 1474175501324447,
+            "updated_at": 1474175501324447,
+            "deleted_at": -1,
+            "clustering_key_hash": 0,
+            "clustering_key_values": ["DD-1"],
+            "cells": [
+              {
+                "name": "Bed",
+                "value": "100"
+              },
+              {
+                "name": "Defibrillator",
+                "value": "11"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
