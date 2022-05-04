@@ -25,7 +25,7 @@ import (
 // Note that this process is usually computationally expensive/intensive, and thus should be run sparingly during "peaceful" times only.
 // Strong assumptions are being made, some of which are:
 // 1. Client requests are deferred until repair is complete (or that client's requests are not frequent enough). A background thread could potentially handle this repair, but additional care needs to be taken when resolving conflicts between client requests and repair requests (such as by comparing timestamps).
-// 2. No network partitions occur during the repair process. This also assumes that all messages eventually arrive at their designated destinations.
+// 2. No network partitions occur DURING the repair process. This also assumes that all messages eventually arrive at their designated destinations.
 // 3. No non-Byzantine or Byzantine failures, such as node crashes or wrong computations, occur DURING the repair process.
 // Usually, this module is also triggered during SSTable compaction process, but since we do not implement actual SSTables for this project, we do not need to worry about that.
 // By right, this process would also delete all tombstones created more than GC_GRACE_SECONDS ago.
