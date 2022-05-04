@@ -6,9 +6,6 @@ import (
 	"time"
 )
 
-type RequestType int
-type MessageType int
-
 type RepairStatus int
 
 const (
@@ -18,18 +15,11 @@ const (
 )
 
 type AntiEntropyHandler struct {
-	Request                *Request
 	Node                   *utils.Node
 	Ring                   *utils.Ring
 	RepairTimeout          time.Duration
 	InternalRequestTimeout time.Duration
 	GCGraceSeconds         int
-}
-
-type Request struct {
-	Type     RequestType `json:"type"`
-	Content  string      `json:"content"`
-	SourceID int         `json:"node_id"`
 }
 
 type RepairGetRequest struct {
