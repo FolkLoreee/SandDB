@@ -10,6 +10,8 @@ import (
 type Handler struct {
 	Node *utils.Node
 }
+
+// EpochTime defines a timestamp encoded as epoch nanoseconds in JSON
 type EpochTime time.Time
 
 type LocalData []*Table
@@ -71,7 +73,9 @@ func (t EpochTime) Unix() int64 {
 	return time.Time(t).Unix()
 }
 
-// This returns the Unix time in nanoseconds.
+// UnixNano returns t as a Unix time, the number of nanoseconds elapsed
+// since January 1, 1970 UTC. The result does not depend on the
+// location associated with t.
 func (t EpochTime) UnixNano() int64 {
 	return time.Time(t).UnixNano()
 }

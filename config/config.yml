@@ -12,11 +12,9 @@ ring:
     - id: 3
       ipaddress: "http://127.0.0.1"
       port: ":8003"
-# TODO: Remember to have a sanity check during startup that RF <= N, where N is the number of nodes (prevent any node from running if this condition is violated)
 replication_factor: 3
 repair_timeout: 8
 internal_request_timeout: 30
 gc_grace_seconds: 10
-
-# timeout in seconds
+# Timeout in seconds
 timeout: 3
