@@ -1,6 +1,10 @@
 # SandDB
 
-> I'm gonna put some sand in Cassandra's eye.
+_"I'm gonna put some sand in Cassandra's eye."_
+
+<p align="center">
+  <img src="./apache_cassandra_logo.png" width="400px" alt="Apache Cassandra">
+</p>
 
 Custom Implementation of [Apache Cassandra](https://cassandra.apache.org/) DB for SUTD ISTD 2022 50.041: Distributed Systems and Computing Group Project.
 
