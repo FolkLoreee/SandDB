@@ -5,9 +5,8 @@ _"I'm gonna put some sand in Cassandra's eye."_
 <p align="center">
   <img src="./apache_cassandra_logo.png" width="400px" alt="Apache Cassandra">
 </p>
+
 Custom Implementation of [Apache Cassandra](https://cassandra.apache.org/) DB for SUTD ISTD 2022 50.041: Distributed Systems and Computing Group Project.
-
-
 
 ## Project Structure
 
@@ -25,13 +24,9 @@ sanddb/
 ├─ main.go
 ```
 
-
-
 ## API Endpoints 🔚
 
 > Note: both partition keys and clustering keys are required since they form the primary key.
-
-
 
 ### Create Table
 
@@ -51,17 +46,15 @@ http://localhost:<port>/create/
 
 ```json
 {
-	"table_name": "hospitals",
-	"partition_key_names": ["HOSPITAL_ID","DEPARTMENT"],
-	"clustering_key_names": ["ROOM_ID"]
+  "table_name": "hospitals",
+  "partition_key_names": ["HOSPITAL_ID", "DEPARTMENT"],
+  "clustering_key_names": ["ROOM_ID"]
 }
 ```
 
 - table_name: name of the table to be inserted/updated
 - partition_key_names: headers of the partition keys
 - clustering_key_names: headers of clustering keys
-
-
 
 ### Insert/Update
 
@@ -81,11 +74,11 @@ http://localhost:<port>/insert/
 
 ```json
 {
-	"table_name": "hospitals",
-	"partition_keys": ["1","GENERAL"],
-	"clustering_keys": ["AA-1"],
-	"cell_names": ["Bed","Oxygen Tank"],
-	"cell_values": ["3","10"]
+  "table_name": "hospitals",
+  "partition_keys": ["1", "GENERAL"],
+  "clustering_keys": ["AA-1"],
+  "cell_names": ["Bed", "Oxygen Tank"],
+  "cell_values": ["3", "10"]
 }
 ```
 
@@ -94,8 +87,6 @@ http://localhost:<port>/insert/
 - clustering_keys: values of the clustering keys
 - cell_names: column headers to be added into the row
 - cell_values: values of the columns to be added into the row
-
-
 
 ### Read
 
@@ -115,9 +106,9 @@ http://localhost:<port>/read/
 
 ```json
 {
-	"table_name": "hospitals",
-	"partition_keys": ["1","GENERAL"],
-	"clustering_keys": ["AA-1"]
+  "table_name": "hospitals",
+  "partition_keys": ["1", "GENERAL"],
+  "clustering_keys": ["AA-1"]
 }
 ```
 
@@ -126,8 +117,6 @@ Params:
 - table_name: name of the table to be queried from
 - partition_keys: values of the partition keys
 - clustering_keys: values of the clustering keys (optional)
-
-
 
 ### Delete
 
@@ -147,9 +136,9 @@ http://localhost:<port>/delete/
 
 ```json
 {
-	"table_name": "hospitals",
-	"partition_keys": ["1","GENERAL"],
-	"clustering_keys": ["AA-1"]
+  "table_name": "hospitals",
+  "partition_keys": ["1", "GENERAL"],
+  "clustering_keys": ["AA-1"]
 }
 ```
 
@@ -158,8 +147,6 @@ Params:
 - table_name: name of the table to remove an entry from
 - partition_keys: values of the partition keys of the row to be deleted
 - clustering_keys: values of the clustering keys of the row to be deleted
-
-
 
 ## Database Structs
 
@@ -196,16 +183,12 @@ type Cell struct {
 }
 ```
 
-
-
 ## Anti-Entropy
 
 For future work in implementing the entire full Merkle Tree, as well as its comparisons, these repositories might be useful:
 
 - [https://github.com/cbergoon/merkletree](https://github.com/cbergoon/merkletree)
 - [https://github.com/aprimadi/merkle-tree](https://github.com/aprimadi/merkle-tree)
-
-
 
 ## Acknowledgements
 
