@@ -39,7 +39,7 @@ function handleCreate(e) {
         }
         var clustering_keys = ""
         if (clustering_key_names.length === 1) {
-            clustering_keys = clustering_keys + `"${clustering_key_names[i]}"`
+            clustering_keys = clustering_keys + `"${clustering_key_names[0]}"`
         } else {
             for (var i = 0; i<clustering_key_names.length; i++) {
                 if (i == partition_key_names.length-1) {
@@ -115,14 +115,14 @@ function handleRead(e) {
         }
 
         var clusteringKeys = ""
-        if (clusteringKeys.length === 1) {
-            clusteringKeys = clusteringKeys + `"${clustering_keys[i]}"`
+        if (clustering_keys.length === 1) {
+            clusteringKeys = clusteringKeys + `"${clustering_keys[0]}"`
         } else {
             for (var i = 0; i<clustering_keys.length; i++) {
                 if (i == partition_keys.length-1) {
-                    clustering_keys = clustering_keys + `"${clustering_key_names[i]}"`    
+                    clusteringKeys = clusteringKeys + `"${clustering_keys[i]}"`    
                 } else {
-                clustering_keys = clustering_keys + `"${clustering_key_names[i]}",`
+                clusteringKeys = clusteringKeys + `"${clustering_keys[i]}",`
                 }
             }
         }
@@ -149,9 +149,8 @@ function handleRead(e) {
             if (response["cells"].length === 1) {
                 result = result + `${response["cells"][0]["name"]}: ${response["cells"][0]["value"]}`
             } else {
-                for (var i = 0; i<response.length; i++) {
-                    console.log(response["cells"][i])
-                    result = result + `${response["cells"][i]["name"]}: ${response["cells"][i]["value"]} \n`
+                for (var i = 0; i<response["cells"].length; i++) {
+                    result = result + `<p> ${response["cells"][i]["name"]}: ${response["cells"][i]["value"]} </p>`
                 }
             }
             console.log(result)
