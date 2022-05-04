@@ -148,7 +148,7 @@ Params:
 - partition_keys: values of the partition keys of the row to be deleted
 - clustering_keys: values of the clustering keys of the row to be deleted
 
-## Database Structs
+## Database Structs 🏛️
 
 `table_name.json`:
 
