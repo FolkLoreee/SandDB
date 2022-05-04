@@ -26,10 +26,10 @@ import (
 // Strong assumptions are being made, some of which are:
 // 1. Client requests are deferred until repair is complete (or that client's requests are not frequent enough). A background thread could potentially handle this repair, but additional care needs to be taken when resolving conflicts between client requests and repair requests (such as by comparing timestamps).
 // 2. No network partitions occur during the repair process. This also assumes that all messages eventually arrive at their designated destinations.
-// 3. No non-Byzantine or Byzantine failures, such as node crashes or wrong computations, occur during the repair process.
+// 3. No non-Byzantine or Byzantine failures, such as node crashes or wrong computations, occur DURING the repair process.
 // Usually, this module is also triggered during SSTable compaction process, but since we do not implement actual SSTables for this project, we do not need to worry about that.
 // By right, this process would also delete all tombstones created more than GC_GRACE_SECONDS ago.
-// This implementation repairs the entire data that resides (and is supposed to reside) in the current node.
+// This implementation repairs the entire data that resides (and is supposed to reside) in the current node first, before passing the chain forward in a rolling/sequential fashion.
 // Future improvements can include a subrange repair feature as well to minimize the impact of the repair.
 func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 	var netClient = &http.Client{
@@ -350,7 +350,7 @@ func (h *AntiEntropyHandler) HandleFullRepairRequest(c *fiber.Ctx) error {
 	}
 }
 
-// Essentially, this is mostly the same as a full repair, but without passing the chain forward to all of the nodes.
+// Essentially, this is mostly the same as a full repair, but without passing the chain forward to all of the nodes in a rolling manner at all.
 // This function is used by a full repair call.
 func (h *AntiEntropyHandler) HandleRepairRequest(c *fiber.Ctx) error {
 	var netClient = &http.Client{
@@ -880,10 +880,11 @@ func (h *AntiEntropyHandler) HandleRepairDeleteRequest(c *fiber.Ctx) error {
 			index := ring.Search(partition.Metadata.PartitionKey)
 			// We perform only primary range deletion on behalf of the requestor node
 			if index == requestData.NodeID {
-				for _, row := range partition.Rows {
+				for k, row := range partition.Rows {
 					// Technically, negative epoch time is actually valid (before January 1, 1970), but we use it in this middleware application as invalid (other placeholders could be considered in the future)
 					if row.DeletedAt.UnixNano() >= 0 && time.Since(time.Unix(0, row.DeletedAt.UnixNano())) > GC_GRACE_SECONDS {
-						data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows[:j], data[i].Partitions[j].Rows[j+1:]...)
+						// Delete the row
+						data[i].Partitions[j].Rows = append(partition.Rows[:k], partition.Rows[k+1:]...)
 						if !dataDeleted {
 							dataDeleted = true
 						}
