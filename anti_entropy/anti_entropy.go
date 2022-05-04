@@ -770,29 +770,26 @@ func (h *AntiEntropyHandler) HandleRepairWriteRequest(c *fiber.Ctx) error {
 							data[i].Partitions[j].Rows = append(data[i].Partitions[j].Rows, requestData.Partitions[0].Rows[0])
 							break out
 						}
-					} else {
-						// Add missing data
-						if !dataIsUpdated && !dataIsFound {
-							dataIsUpdated = true
-							data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
-							break out
-						}
 					}
 				}
-			} else {
 				// Add missing data
 				if !dataIsUpdated && !dataIsFound {
 					dataIsUpdated = true
-					newTable := &db.Table{
-						TableName:          requestData.TableName,
-						PartitionKeyNames:  requestData.PartitionKeyNames,
-						ClusteringKeyNames: requestData.ClusteringKeyNames,
-						Partitions:         requestData.Partitions,
-					}
-					data = append(data, newTable)
+					data[i].Partitions = append(data[i].Partitions, requestData.Partitions[0])
 					break out
 				}
 			}
+		}
+		// Add missing data
+		if !dataIsUpdated && !dataIsFound {
+			dataIsUpdated = true
+			newTable := &db.Table{
+				TableName:          requestData.TableName,
+				PartitionKeyNames:  requestData.PartitionKeyNames,
+				ClusteringKeyNames: requestData.ClusteringKeyNames,
+				Partitions:         requestData.Partitions,
+			}
+			data = append(data, newTable)
 		}
 	}
 
